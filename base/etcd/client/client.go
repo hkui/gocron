@@ -14,7 +14,7 @@ func GetClient()(*clientv3.Client,error){
 
 	)
 	config=clientv3.Config{
-		Endpoints:[]string{"39.100.78.46"},
+		Endpoints:[]string{"39.100.78.46:2379"},
 		DialTimeout:3*time.Second,
 	}
 
