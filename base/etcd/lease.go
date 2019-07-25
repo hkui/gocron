@@ -35,8 +35,14 @@ func main() {
 	//租约Id
 	leaseId:=leaseGrantResp.ID
 
+	ctx,cancelFun:=context.WithCancel(context.Background())
+	//5秒后停止续租
+	time.AfterFunc(5*time.Second, func() {
+		cancelFun()
+	})
+
 	//自动续租
-	keepRespChan,err:=lease.KeepAlive(context.TODO(),leaseId)
+	keepRespChan,err:=lease.KeepAlive(ctx,leaseId)
 	if err!=nil{
 		fmt.Println(err)
 		return
@@ -46,7 +52,7 @@ func main() {
 		for{
 			select {
 				case keepResp:=<-keepRespChan:
-					if keepRespChan==nil{
+					if keepResp ==nil{
 						fmt.Println("租约已失效")
 						goto  END
 					}else{
@@ -67,22 +73,20 @@ func main() {
 		return
 	}
 	fmt.Printf("写入成功:%d\n",putResp.Header.Revision)
+
 	for{
 		getResp,err:=kv.Get(context.TODO(),key)
 		if err!=nil{
 			fmt.Println(err)
 			return
 		}
-		if getResp.Count==0{
+		if getResp.Count==0 {
 			fmt.Println("kv 过期了")
 			break
 		}
 		fmt.Println("还没过期",getResp.Kvs)
 		time.Sleep(1*time.Second)
 	}
-
-
-
 
 
 }
