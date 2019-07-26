@@ -2,83 +2,48 @@ package main
 
 import (
 	"base/mongodb/conn"
+	"base/mongodb/models"
+	"context"
 	"fmt"
-	"gopkg.in/mgo.v2"
 )
-type stu struct {
-	Name string `bson:"name"`
-	Age int `bson:"age"`
-	Sex int
-	ClassNo int `bson:"class_no"`
-}
 
 
 func main() {
-	var (
-		session *mgo.Session
-		err error
-	)
-	session,err=conn.GetSession()
-	defer session.Close()
+	client:=conn.GetClient()
+
+	collection:=client.Database("test").Collection("stu")
+	//插入1条
+	/*stu:= models.Stu{
+		Name:"hkui",
+		Age:18,
+		Sex:1,
+		ClassNo:1024,
+	}
+
+	insertOneRes,err:=collection.InsertOne(context.TODO(),stu)
+	if(err!=nil){
+		fmt.Println(err)
+	}
+	fmt.Println(insertOneRes.InsertedID)*/
+
+	//插入多条
+	var manydocs []interface{}
+	var oneStu models.Stu
+	for i:=0;i<10 ;i++  {
+		oneStu=*new(models.Stu)
+		oneStu.Name=fmt.Sprintf("hkui_%d",i)
+		oneStu.Age=i
+		oneStu.Sex=i/2
+		oneStu.ClassNo=i
+		manydocs= append(manydocs, oneStu)
+
+	}
+
+	insertManyRes,err:=collection.InsertMany(context.TODO(),manydocs)
 	if err!=nil{
 		fmt.Println(err)
-		return
 	}
-	c:=session.DB("test").C("stu")
-	//单条插入
-	/*for i:=0;i<10;i++{
-		stu1:=new (stu)
-		stu1.Name="abc"
-		stu1.Age=i
-		stu1.Sex=1
-		stu1.ClassNo=2
-		if err=c.Insert(stu1);err!=nil{
-			fmt.Println(err)
-		}
-
-	}*/
-	//多条插入
-	var manyStus [] *stu
-	for i:=0;i<10;i++{
-		stu1:=new (stu)
-		stu1.Name="abc"
-		stu1.Age=i
-		stu1.Sex=1
-		stu1.ClassNo=2
-		manyStus=append(manyStus,stu1)
-	}
-
-	resErr:=c.Insert(manyStus)
-	if resErr!=nil{
-		fmt.Println(resErr)
-	}
-
-	//查询
-	//var res []interface{}
-
-	//c.Find(bson.M{"name":"abc"}).All(&res) //根据name查询
-	//c.Find(bson.M{"age":bson.M{"$gte":5}}).All(&res) //根据name查询
-	//for _,v:=range res{
-	//	fmt.Println(v)
-	//}
-	//根据id查询
-/*
-	idStr := "5d3ac4356ac9e2574daf3cdc"
-	objectId := bson.ObjectIdHex(idStr)
-	var one stu
-	c.Find(bson.M{"_id":objectId}).One(&one)
-	fmt.Printf("%+v",one)*/
-
-
-
-
-
-
-
-
-
-
-
+	fmt.Println(insertManyRes.InsertedIDs)
 
 
 
