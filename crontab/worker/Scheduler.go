@@ -27,14 +27,10 @@ func (scheduler *Scheduler)scheduleLoop()  {
 		jobEvent *common.JobEvent
 		scheduleAfter time.Duration
 		scheduleTimer *time.Timer
-
 	)
 	scheduleAfter=scheduler.TrySchedule()
-
 	//调度的延迟定时器
 	scheduleTimer=time.NewTimer(scheduleAfter)
-
-
 	for{
 		select {
 			case jobEvent=<-scheduler.jobEventChan:
@@ -42,13 +38,11 @@ func (scheduler *Scheduler)scheduleLoop()  {
 			case <-scheduleTimer.C://最近的任务到期了
 		}
 		scheduleAfter=scheduler.TrySchedule()
-
 		//重置调度间隔
 		scheduleTimer.Reset(scheduleAfter)
 	}
 }
 //处理任务事件
-
 func (scheduler *Scheduler)handleJobEvent(jobEvent *common.JobEvent)  {
 	var (
 		jobSchedulePlan *common.JobSchedulePlan
