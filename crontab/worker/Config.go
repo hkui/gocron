@@ -1,4 +1,4 @@
-package master
+package worker
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ type Config struct {
 	ApiWriteTimeout int64 `json:"apiWriteTimeout"`
 	EtcdEndpoints []string `json:"etcdEndpoints"`
 	EctdDialTimeout int64 `json:"ectdDialTimeout"`
-	Webroot string `json:"webroot"`
+
 }
 var (
 	G_config *Config

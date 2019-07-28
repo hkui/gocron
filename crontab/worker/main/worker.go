@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crontab/master"
+	"crontab/worker"
 	"flag"
 	"fmt"
 	"runtime"
@@ -11,14 +11,13 @@ import (
 func initEnv() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 }
-
 var (
 	confFile string
 )
 
 func initArgs() {
-	// master -config ./master.json
-	flag.StringVar(&confFile, "config", "./master.json", "指定master.josn")
+	// worker -config ./worker.json
+	flag.StringVar(&confFile, "config", "./worker.json", "指定worker.josn")
 	flag.Parse()
 }
 func main() {
@@ -28,16 +27,22 @@ func main() {
 	initArgs()
 	//初始化线程
 	initEnv()
-	if err = master.InitConfig(confFile); err != nil {
+	if err = worker.InitConfig(confFile); err != nil {
 		goto ERR
 	}
-	if err = master.InitJobMgr(); err != nil {
+	if err=worker.InitScheduler();err!=nil{
 		goto ERR
 	}
-	//启动Api HTTP服务
-	if err = master.InitApiServer(); err != nil {
+	//初始化任务管理器
+	if err=worker.InitJobMgr();err!=nil{
 		goto ERR
 	}
+
+	err=worker.G_jobMgr.WatchJobs()
+	if err!=nil{
+		goto ERR
+	}
+
 	for {
 		time.Sleep(1 * time.Second)
 	}

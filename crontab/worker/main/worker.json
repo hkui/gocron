@@ -6,7 +6,12 @@
   "apiReadTimeout": 5000,
 
   "API接口写超时": "单位毫秒",
-  "apiWriteTimeout": 5000
+  "apiWriteTimeout": 5000,
 
+  "etcd集群列表":"多个" ,
+  "etcdEndpoints": ["39.100.78.46:2379"],
+
+  "etcd连接超时":"单位毫秒",
+  "ectdDialTimeout": 5000
 
 }
