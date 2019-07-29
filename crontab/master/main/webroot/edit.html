@@ -6,83 +6,141 @@
     <script src="/js/jquery.min.js"></script>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <script src="/js/bootstrap.bundle.js"></script>
+    <script src="/js/layer/layer.js"></script>
 </head>
+<style>
+    #check {
+        width: 20%;
+        border: 1px solid darkblue;
+        border-radius: 1px;
+        display: none;
+    }
+
+    #check ul {
+        list-style: none;
+        margin: 5px 5px 0 0;
+        width: 100%;
+    }
+
+    #check ul li {
+        border-bottom: 1px darkblue dotted;
+        width: 100%;
+    }
+    #check h5{
+        text-align: center;
+    }
+</style>
 <body>
 <div class="container-fluid">
-<form>
-    <div class="form-group">
-        <label for="exampleInputEmail1">任务名称</label>
-        <input type="text" class="form-control" name="name" >
-    </div>
-    <div class="form-group">
-        <label for="exampleInputPassword1">shell命令</label>
-        <input type="text" class="form-control" name="command" >
-    </div>
-    <div class="form-group">
-        <label for="exampleInputPassword1">cron表达式</label>
-        <input type="text" class="form-control" name="cronExpr">
-    </div>
+    <form>
+        <div class="form-group">
+            <label for="exampleInputEmail1">任务名称</label>
+            <input type="text" class="form-control" name="name">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">shell命令</label>
+            <input type="text" class="form-control" name="command">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">cron表达式</label>
+            <input type="text" class="form-control" name="cronExpr">
+        </div>
+        <div class="form-group" id="check">
+            <h5>预计下次执行时间</h5>
+            <ul></ul>
 
-    <button type="submit" class="btn btn-primary" id="submit">提交</button>
-</form>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submit">提交</button>
+    </form>
 </div>
 <script type="text/javascript">
-    function getQueryVariable(variable)
-    {
+    function getQueryVariable(variable) {
         var query = window.location.search.substring(1);
         var vars = query.split("&");
-        for (var i=0;i<vars.length;i++) {
+        for (var i = 0; i < vars.length; i++) {
             var pair = vars[i].split("=");
-            if(pair[0] == variable){return pair[1];}
+            if (pair[0] == variable) {
+                return pair[1];
+            }
         }
-        return(false);
+        return (false);
     }
+
     $('#submit').click(function (e) {
         e.preventDefault();
-        var name=$("input[name='name']").val()
-        var command=$("input[name='command']").val()
-        var cronExpr=$("input[name='cronExpr']").val()
-        postData={
-            name:name,
-            command:command,
-            cronExpr:cronExpr
+        var name = $("input[name='name']").val()
+        var command = $("input[name='command']").val()
+        var cronExpr = $("input[name='cronExpr']").val()
+        postData = {
+            name: name,
+            command: command,
+            cronExpr: cronExpr
         }
         $.ajax({
-            url:'/job/save',
-            type:'POST',
-            dataType:'json',
-            data:'job='+JSON.stringify(postData),
-            success:function (res) {
-                alert(res.msg)
-                if(res.errno==0){
-                    window.location.href="/"
-                }
+            url: '/job/save',
+            type: 'POST',
+            dataType: 'json',
+            data: 'job=' + JSON.stringify(postData),
+            success: function (res) {
+                layer.msg(res.msg, {icon: 1});
+                setTimeout(function () {
+                    if (res.errno == 0) {
+                        window.location.href = "/"
+                    }
+                }, 1500)
+
             }
         })
 
     })
-    $(function(){
-        var job_name=getQueryVariable('job_name')
-        if(!job_name) return ;
+    $("input[name='cronExpr']").blur(function () {
+        var cronExpr = $(this).val()
+        if (cronExpr.length<1) return false;
         $.ajax({
-            url:'/job/one?name='+job_name,
-            dataType:'json',
-            success:function (res) {
-                if(res.errno==0){
-                    var data=res["data"];
-                    for (var k in data){
-                        $("input[name='"+k+"']").val(data[k])
+            url: '/job/checkexpcron',
+            dataType: 'json',
+            type:'POST',
+            data:'cronExpr='+cronExpr,
+            success: function (res) {
+                if (res.errno == 0) {
+                    var data=res.data;
+                    var lihtml='';
+                    for (var i in data){
+                        lihtml+="<li>"+data[i]+"</li>";
                     }
-                }else{
+                    $('#check ul').html(lihtml)
+                    $('#check').show();
+
+                } else {
+                    layer.msg(res.msg, {icon: 2});
+                    $('#check ul').html('')
+                    $('#check').hidden();
+                }
+
+            }
+        })
+    })
+    $(function () {
+        var job_name = getQueryVariable('job_name')
+        if (!job_name) return;
+        $.ajax({
+            url: '/job/one?name=' + job_name,
+            dataType: 'json',
+            success: function (res) {
+                if (res.errno == 0) {
+                    var data = res["data"];
+                    for (var k in data) {
+                        $("input[name='" + k + "']").val(data[k])
+                    }
+                } else {
                     console.log(res)
                 }
 
             }
         })
 
-        
     })
-
 
 
 </script>

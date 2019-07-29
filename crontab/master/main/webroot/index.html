@@ -6,6 +6,7 @@
     <script src="/js/jquery.min.js"></script>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <script src="/js/bootstrap.bundle.js"></script>
+    <script src="/js/layer/layer.js"></script>
 </head>
 <body>
 <div class="container-fluid">
@@ -106,15 +107,52 @@
         })
 
         $("#job-list").on("click", ".delete-job", function (event) {
-            var job_name = $(this).closest("tr").find(".job-name").attr("attr_job_name")
-            $.ajax({
+            var tr=$(this).closest("tr");
+            var job_name = tr.find(".job-name").attr("attr_job_name")
+            layer.confirm('确定要删除'+job_name+'?', {
+                btn: ['确定','取消'] //按钮
+            }, function(){
+                $.ajax({
                     url: "/job/delete",
+                    type:'POST',
+                    data:'name='+job_name,
+                    dataType: "json",
+                    success:function(res){
+                        layer.msg(res.msg, {icon: 1});
+                        if(res.errno==0){
+                            tr.remove();
+                        }
+                    }
 
-                }
-            )
+                })
+
+            }, function(){
+                layer.closeAll();
+            });
+
+
         })
         $("#job-list").on("click", ".kill-job", function (event) {
-            console.log($(this).attr("class"))
+            var tr=$(this).closest("tr");
+            var job_name = tr.find(".job-name").attr("attr_job_name")
+            layer.confirm('确定要强杀吗'+job_name+'?', {
+                btn: ['确定','取消'] //按钮
+            }, function(){
+                $.ajax({
+                    url: "/job/kill",
+                    type:'POST',
+                    data:'name='+job_name,
+                    dataType: "json",
+                    success:function(res){
+                        layer.msg(res.msg, {icon: 1});
+                    }
+
+                })
+
+            }, function(){
+                layer.closeAll();
+            });
+
         })
 
     })

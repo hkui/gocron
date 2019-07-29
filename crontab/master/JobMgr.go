@@ -155,19 +155,10 @@ func (JobMgr *JobMgr)JobOne(name string)(jobOne *common.Job,err error)  {
 	if jobOne,err=common.UnpackJob(getResp.Kvs[0].Value);err!=nil{
 		return
 	}
-
-
 	return
-
-
-
-
-
-
-
-
-
+}
+func (jobNgr *JobMgr)CheckCronExpr(cronExpr string)(nexts []string,err error)  {
+	nexts,err=common.CheckCronExpr(cronExpr)
 	return
-
 }
 

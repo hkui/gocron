@@ -80,5 +80,29 @@ func BuildJobSchedulePlan(job *Job)(jobSchedulePlan *JobSchedulePlan,err error) 
 		NextTime:expr.Next(time.Now()),
 	}
 	return
+}
+//检查cron表达式并返回下10次的执行时间
+func CheckCronExpr(mycronExp string)(nexts []string,err error)  {
+	var(
 
+		exp *cronexpr.Expression
+		now time.Time
+		nextTime time.Time
+	)
+	exp,err=cronexpr.Parse(mycronExp)
+	if err!=nil{
+		return
+	}
+	now=time.Now()
+	nextTime=exp.Next(now)
+
+	for i:=0;i<10;i++{
+		if i==0{
+			nextTime=exp.Next(now)
+		}else{
+			nextTime=exp.Next(nextTime)
+		}
+		nexts= append(nexts, nextTime.Format("2006-01-02 15:04:05"))
+	}
+	return
 }

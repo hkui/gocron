@@ -13,7 +13,6 @@ type CronJob struct {
 	nextTime time.Time
 }
 
-
 func main() {
 	var (
 		cronJob *CronJob
