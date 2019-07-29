@@ -32,12 +32,11 @@ func InitApiServer() (err error) {
 	mux.HandleFunc("/job/delete", handleJobDelte)
 	mux.HandleFunc("/job/list", handleJobList)
 	mux.HandleFunc("/job/kill", handleJobKill)
+	mux.HandleFunc("/job/one", handleJobOne)
 
 	staticDir=http.Dir(G_config.Webroot)
 	staticHandler=http.FileServer(staticDir)
 	mux.Handle("/",http.StripPrefix("/",staticHandler))
-
-
 
 
 	//启动tcp监听
@@ -180,3 +179,33 @@ ERR:
 		log.Println(err)
 	}
 }
+func handleJobOne(resp http.ResponseWriter, req *http.Request) {
+	var (
+		err   error
+		name  string
+		bytes []byte
+		job *common.Job
+	)
+	if err = req.ParseForm(); err != nil {
+		goto ERR
+	}
+	name = req.Form.Get("name")
+	if job,err = G_jobMgr.JobOne(name); err != nil {
+		goto ERR
+	}
+	if bytes, err = common.BuildResponse(0, "success", job); err == nil {
+		if _,err= resp.Write(bytes);err!=nil{
+			log.Println(err)
+		}
+	} else {
+		log.Println(err)
+	}
+	return
+ERR:
+	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+		resp.Write(bytes)
+	} else {
+		log.Println(err)
+	}
+}
+

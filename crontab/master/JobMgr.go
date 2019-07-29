@@ -116,8 +116,6 @@ func (JobMgr *JobMgr)JobList()(jobList[]common.Job,err error)  {
 
 	return
 
-
-
 }
 func (JobMgr *JobMgr)KillJob(name string)(err error){
 	var (
@@ -137,3 +135,39 @@ func (JobMgr *JobMgr)KillJob(name string)(err error){
 	return
 
 }
+//获取一个job
+func (JobMgr *JobMgr)JobOne(name string)(jobOne *common.Job,err error)  {
+	var (
+		jobKey string
+		getResp *clientv3.GetResponse
+
+
+		//job common.Job
+	)
+	jobKey=common.JOB_SAVE_DIR+name
+
+	if getResp,err=JobMgr.kv.Get(context.TODO(),jobKey);err!=nil{
+		return
+	}
+	if len(getResp.Kvs)<0{
+		return
+	}
+	if jobOne,err=common.UnpackJob(getResp.Kvs[0].Value);err!=nil{
+		return
+	}
+
+
+	return
+
+
+
+
+
+
+
+
+
+	return
+
+}
+

@@ -18,7 +18,7 @@ func main() {
 			Ch<-i
 		}
 		time.Sleep(1*time.Millisecond)
-		flag<-true
+		close(flag)
 	}()
 
 	for{
