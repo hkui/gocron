@@ -63,7 +63,7 @@ func (JobMgr *JobMgr)WatchJobs()(err error)  {
 		if job,err=common.UnpackJob(kvpair.Value);err==nil{
 			jobEvent=common.BuildJobEvent(common.JOB_EVENT_SAVE,job)
 			G_scheduler.PushJobEvent(jobEvent)
-			fmt.Printf("%++v\n",jobEvent)
+			fmt.Printf("%++v\n",jobEvent.Job.Name)
 
 		}
 	}

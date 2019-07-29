@@ -49,6 +49,7 @@ func (scheduler *Scheduler)handleJobEvent(jobEvent *common.JobEvent)  {
 		err error
 		jobExisted bool
 	)
+	fmt.Println("handleJobEvent",jobEvent.Job.Name,jobEvent.EventType)
 
 	switch jobEvent.EventType {
 	case common.JOB_EVENT_SAVE:
@@ -85,7 +86,7 @@ func (scheduler *Scheduler)TrySchedule()(scheduleAfter time.Duration)  {
 	for _,jobPlan=range scheduler.jobPlanTable{
 		if jobPlan.NextTime.Before(now)||jobPlan.NextTime.Equal(now){
 			//todo 尝试执行任务
-			fmt.Println("执行",jobPlan.Job.Name)
+			fmt.Println("执行",jobPlan.Job.Name,time.Now().Format("2006-01-02 15:04:05"))
 			jobPlan.NextTime=jobPlan.Expr.Next(now)
 		}
 	}
