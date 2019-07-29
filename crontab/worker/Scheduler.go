@@ -88,12 +88,13 @@ func (scheduler *Scheduler)TrySchedule()(scheduleAfter time.Duration)  {
 			//todo 尝试执行任务
 			fmt.Println("执行",jobPlan.Job.Name,time.Now().Format("2006-01-02 15:04:05"))
 			jobPlan.NextTime=jobPlan.Expr.Next(now)
+			//统计最近一个要过期的任务事件
+		}
+		if nearTime==nil||jobPlan.NextTime.Before(*nearTime){
+				nearTime=&jobPlan.NextTime
 		}
 	}
-	//统计最近一个要过期的任务事件
-	if nearTime==nil||jobPlan.NextTime.Before(*nearTime){
-		nearTime=&jobPlan.NextTime
-	}
+
 	//下次调度时间间隔
 	scheduleAfter=(*nearTime).Sub(now)
 	return

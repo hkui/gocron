@@ -3,7 +3,6 @@ package master
 import (
 	"crontab/common"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -125,7 +124,7 @@ func handleJobDelte(resp http.ResponseWriter, req *http.Request) {
 	if bytes, err = common.BuildResponse(0, "success", &oldJob); err == nil {
 		resp.Write(bytes)
 	} else {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	return
 
@@ -133,7 +132,7 @@ ERR:
 	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	} else {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
 
@@ -154,11 +153,11 @@ func handleJobList(resp http.ResponseWriter, req *http.Request) {
 		}
 
 	} else {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 ERR:
-	fmt.Println(err)
+	log.Println(err)
 
 }
 func handleJobKill(resp http.ResponseWriter, req *http.Request) {
