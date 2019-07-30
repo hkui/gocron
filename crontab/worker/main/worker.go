@@ -30,6 +30,11 @@ func main() {
 	if err = worker.InitConfig(confFile); err != nil {
 		goto ERR
 	}
+	//启动执行器
+	if err=worker.InitExecutor();err!=nil{
+		goto ERR
+	}
+
 	if err=worker.InitScheduler();err!=nil{
 		goto ERR
 	}

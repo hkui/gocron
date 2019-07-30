@@ -34,6 +34,14 @@ type JobEvent struct {
 	EventType int
 	Job *Job
 }
+type JobExecuteResult struct {
+	ExecuteInfo *JobExecuteInfo
+	Output []byte  //脚本输出
+	Err error	//脚本错误原因
+	StartTime time.Time //启动时间
+	EndTime time.Time  //结束时间
+
+}
 
 //应答方法
 
@@ -62,7 +70,7 @@ func UnpackJob(value []byte)(ret *Job,err error)  {
 }
 // 从/cron/jobs/job1  得到job1
 func ExtraJobName(jobKey string)string  {
-	return strings.TrimPrefix(jobKey,JOB_KILLER_DIR)
+	return strings.TrimPrefix(jobKey,JOB_SAVE_DIR)
 }
 func BuildJobEvent(eventType int,job *Job) (jobEvent *JobEvent) {
 	return &JobEvent{

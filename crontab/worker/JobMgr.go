@@ -60,12 +60,12 @@ func (JobMgr *JobMgr)WatchJobs()(err error)  {
 		return
 	}
 	//初始化时载入所有的任务
-	fmt.Printf("kvs=%+v\n",getResp.Kvs)
+	fmt.Printf("载入的任务数:%d\n",len(getResp.Kvs))
 	for _,kvpair=range getResp.Kvs{
 		if job,err=common.UnpackJob(kvpair.Value);err==nil{
 			jobEvent=common.BuildJobEvent(common.JOB_EVENT_SAVE,job)
 			G_scheduler.PushJobEvent(jobEvent)
-			fmt.Printf("%++v\n",jobEvent.Job.Name)
+			fmt.Printf("pushJobEvent %++v\n",jobEvent.Job.Name)
 		}
 	}
 
@@ -100,6 +100,10 @@ func (JobMgr *JobMgr)WatchJobs()(err error)  {
 			}
 		}
 	}()
+	return
+}
+func (jobMgr *JobMgr)CreateJobLock(jobName string)(jobLock *JobLock)  {
+	jobLock=InitJobLock(jobName,jobMgr.kv,jobMgr.lease)
 	return
 }
 

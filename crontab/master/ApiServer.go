@@ -132,7 +132,7 @@ ERR:
 	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	} else {
-		log.Println(err)
+		log.Println(err,log.Lshortfile)
 	}
 }
 

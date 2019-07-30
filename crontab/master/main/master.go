@@ -22,6 +22,7 @@ func initArgs() {
 	flag.Parse()
 }
 func main() {
+
 	var (
 		err error
 	)

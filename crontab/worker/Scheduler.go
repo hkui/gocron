@@ -10,6 +10,7 @@ type Scheduler struct {
 	jobEventChan chan *common.JobEvent  //etcd任务事件队列
 	jobPlanTable map[string]*common.JobSchedulePlan  //任务调度计划表
 	jobExecuteInfoTable map[string]*common.JobExecuteInfo
+	jobResultChan chan *common.JobExecuteResult //任务结果队列
 }
 var(
 	G_scheduler *Scheduler
@@ -20,6 +21,7 @@ func InitScheduler() (err error) {
 		jobEventChan:make(chan *common.JobEvent,1000),
 		jobPlanTable:make(map[string]*common.JobSchedulePlan),
 		jobExecuteInfoTable:make(map[string]*common.JobExecuteInfo),
+		jobResultChan:make(chan *common.JobExecuteResult),
 	}
 	go G_scheduler.scheduleLoop()
 	return
@@ -29,6 +31,7 @@ func (scheduler *Scheduler)scheduleLoop()  {
 		jobEvent *common.JobEvent
 		scheduleAfter time.Duration
 		scheduleTimer *time.Timer
+		jobResult *common.JobExecuteResult
 	)
 	scheduleAfter=scheduler.TrySchedule()
 	//调度的延迟定时器
@@ -38,8 +41,11 @@ func (scheduler *Scheduler)scheduleLoop()  {
 			case jobEvent=<-scheduler.jobEventChan:
 				scheduler.handleJobEvent(jobEvent)
 			case <-scheduleTimer.C://最近的任务到期了
+				fmt.Println("timer",scheduleAfter)
+			case jobResult=<-scheduler.jobResultChan:
+				scheduler.HandleJobResult(jobResult)
+
 		}
-		fmt.Printf("before schedule %+v\n",jobEvent.Job.Name)
 		scheduleAfter=scheduler.TrySchedule()
 		//重置调度间隔
 		scheduleTimer.Reset(scheduleAfter)
@@ -51,13 +57,19 @@ func (scheduler *Scheduler)TryStartJob(plan *common.JobSchedulePlan)  {
 		jobExecuteInfo *common.JobExecuteInfo
 		jobExecuting bool
 	)
+	//任务正在执行中还未结束，跳过本次调度
 	if jobExecuteInfo ,jobExecuting=scheduler.jobExecuteInfoTable[plan.Job.Name];jobExecuting{
 		//跳过执行
+		fmt.Println("正在执行，还没有退出,跳过",jobExecuteInfo.Job.Name)
 		return
 	}
+	//构建执行状态信息
 	jobExecuteInfo=common.BuildJobExecuteInfo(plan)
+	//保存执行状态
 	scheduler.jobExecuteInfoTable[plan.Job.Name]=jobExecuteInfo
-	//todo 执行
+	//执行任务
+	fmt.Println("执行任务:",jobExecuteInfo.Job.Name,jobExecuteInfo.PlanTime,jobExecuteInfo.RealTime)
+	G_executor.ExecuteJob(jobExecuteInfo)
 
 }
 
@@ -69,19 +81,18 @@ func (scheduler *Scheduler)handleJobEvent(jobEvent *common.JobEvent)  {
 		err error
 		jobExisted bool
 	)
-	fmt.Println("handleJobEvent",jobEvent.Job.Name,jobEvent.EventType)
 
 	switch jobEvent.EventType {
 	case common.JOB_EVENT_SAVE:
 		if jobSchedulePlan,err=common.BuildJobSchedulePlan(jobEvent.Job);err!=nil{
 			return
 		}
+		fmt.Printf("添加了 %s\n",jobEvent.Job.Name)
 		scheduler.jobPlanTable[jobEvent.Job.Name]=jobSchedulePlan
 
 	case common.JOB_EVENT_DELETE:
-		fmt.Println("删除0",jobEvent.Job.Name,scheduler.jobPlanTable)
 		if jobSchedulePlan,jobExisted=scheduler.jobPlanTable[jobEvent.Job.Name];jobExisted{
-			fmt.Println("删除1",jobEvent.Job.Name)
+			fmt.Println("删除了",jobEvent.Job.Name)
 			delete(scheduler.jobPlanTable,jobEvent.Job.Name)
 		}
 
@@ -108,7 +119,8 @@ func (scheduler *Scheduler)TrySchedule()(scheduleAfter time.Duration)  {
 	for _,jobPlan=range scheduler.jobPlanTable{
 		if jobPlan.NextTime.Before(now)||jobPlan.NextTime.Equal(now){
 			//todo 尝试执行任务
-			fmt.Println("执行",jobPlan.Job.Name,time.Now().Format("2006-01-02 15:04:05"))
+			fmt.Println("将要执行",jobPlan.Job.Name,time.Now())
+			scheduler.TryStartJob(jobPlan)
 			jobPlan.NextTime=jobPlan.Expr.Next(now)
 			//统计最近一个要过期的任务事件
 		}
@@ -121,5 +133,17 @@ func (scheduler *Scheduler)TrySchedule()(scheduleAfter time.Duration)  {
 	//下次调度时间间隔
 	scheduleAfter=(*nearTime).Sub(now)
 	return
+
+}
+//执行完的结果队列
+func (scheduler *Scheduler)PushJobResult(result *common.JobExecuteResult)  {
+	scheduler.jobResultChan<-result
+}
+//处理任务结果
+func (scheduler *Scheduler)HandleJobResult(result *common.JobExecuteResult)  {
+	//删除执行状态
+	delete(scheduler.jobExecuteInfoTable,result.ExecuteInfo.Job.Name)
+	fmt.Printf("任务执行完成:job=%s,output=%s,err=%v",result.ExecuteInfo.Job.Name,string(result.Output),result.Err)
+
 
 }
