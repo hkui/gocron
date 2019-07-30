@@ -39,7 +39,7 @@ func (scheduler *Scheduler)scheduleLoop()  {
 				scheduler.handleJobEvent(jobEvent)
 			case <-scheduleTimer.C://最近的任务到期了
 		}
-		fmt.Printf("try schedule %+v\n",jobEvent)
+		fmt.Printf("before schedule %+v\n",jobEvent.Job.Name)
 		scheduleAfter=scheduler.TrySchedule()
 		//重置调度间隔
 		scheduleTimer.Reset(scheduleAfter)
@@ -79,7 +79,9 @@ func (scheduler *Scheduler)handleJobEvent(jobEvent *common.JobEvent)  {
 		scheduler.jobPlanTable[jobEvent.Job.Name]=jobSchedulePlan
 
 	case common.JOB_EVENT_DELETE:
+		fmt.Println("删除0",jobEvent.Job.Name,scheduler.jobPlanTable)
 		if jobSchedulePlan,jobExisted=scheduler.jobPlanTable[jobEvent.Job.Name];jobExisted{
+			fmt.Println("删除1",jobEvent.Job.Name)
 			delete(scheduler.jobPlanTable,jobEvent.Job.Name)
 		}
 
@@ -110,6 +112,7 @@ func (scheduler *Scheduler)TrySchedule()(scheduleAfter time.Duration)  {
 			jobPlan.NextTime=jobPlan.Expr.Next(now)
 			//统计最近一个要过期的任务事件
 		}
+		//查找最近要过期的
 		if nearTime==nil||jobPlan.NextTime.Before(*nearTime){
 				nearTime=&jobPlan.NextTime
 		}

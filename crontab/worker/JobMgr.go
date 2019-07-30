@@ -59,7 +59,7 @@ func (JobMgr *JobMgr)WatchJobs()(err error)  {
 	if getResp,err=JobMgr.kv.Get(context.TODO(),common.JOB_SAVE_DIR,clientv3.WithPrefix());err!=nil{
 		return
 	}
-	//开始时载入
+	//初始化时载入所有的任务
 	fmt.Printf("kvs=%+v\n",getResp.Kvs)
 	for _,kvpair=range getResp.Kvs{
 		if job,err=common.UnpackJob(kvpair.Value);err==nil{
@@ -68,6 +68,7 @@ func (JobMgr *JobMgr)WatchJobs()(err error)  {
 			fmt.Printf("%++v\n",jobEvent.Job.Name)
 		}
 	}
+
 	//从该revision向后监听变化事件
 	go func() {
 		watchStartRevision=getResp.Header.Revision+1
