@@ -56,7 +56,6 @@ func (JobMgr *JobMgr)WatchJobs()(err error)  {
 		jobEvent *common.JobEvent
 
 	)
-	fmt.Println("初始化载入")
 	if getResp,err=JobMgr.kv.Get(context.TODO(),common.JOB_SAVE_DIR,clientv3.WithPrefix());err!=nil{
 		return
 	}
@@ -67,16 +66,15 @@ func (JobMgr *JobMgr)WatchJobs()(err error)  {
 			jobEvent=common.BuildJobEvent(common.JOB_EVENT_SAVE,job)
 			G_scheduler.PushJobEvent(jobEvent)
 			fmt.Printf("%++v\n",jobEvent.Job.Name)
-
 		}
 	}
 	//从该revision向后监听变化事件
 	go func() {
 		watchStartRevision=getResp.Header.Revision+1
 		//监听/cron/jobs/的变化
-		fmt.Println("开始监听")
 		watchChan=JobMgr.watcher.Watch(context.TODO(),common.JOB_SAVE_DIR,clientv3.WithPrefix())
 
+		fmt.Println("开始监听")
 		for watchResp=range watchChan{
 			fmt.Printf("events=%+v\n",watchResp.Events)
 			for _,watchEvent=range watchResp.Events{

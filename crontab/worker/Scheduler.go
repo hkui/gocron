@@ -9,6 +9,7 @@ import (
 type Scheduler struct {
 	jobEventChan chan *common.JobEvent  //etcd任务事件队列
 	jobPlanTable map[string]*common.JobSchedulePlan  //任务调度计划表
+	jobExecuteInfoTable map[string]*common.JobExecuteInfo
 }
 var(
 	G_scheduler *Scheduler
@@ -18,6 +19,7 @@ func InitScheduler() (err error) {
 	G_scheduler=&Scheduler{
 		jobEventChan:make(chan *common.JobEvent,1000),
 		jobPlanTable:make(map[string]*common.JobSchedulePlan),
+		jobExecuteInfoTable:make(map[string]*common.JobExecuteInfo),
 	}
 	go G_scheduler.scheduleLoop()
 	return
@@ -37,11 +39,29 @@ func (scheduler *Scheduler)scheduleLoop()  {
 				scheduler.handleJobEvent(jobEvent)
 			case <-scheduleTimer.C://最近的任务到期了
 		}
+		fmt.Printf("try schedule %+v\n",jobEvent)
 		scheduleAfter=scheduler.TrySchedule()
 		//重置调度间隔
 		scheduleTimer.Reset(scheduleAfter)
 	}
 }
+//尝试执行任务
+func (scheduler *Scheduler)TryStartJob(plan *common.JobSchedulePlan)  {
+	var (
+		jobExecuteInfo *common.JobExecuteInfo
+		jobExecuting bool
+	)
+	if jobExecuteInfo ,jobExecuting=scheduler.jobExecuteInfoTable[plan.Job.Name];jobExecuting{
+		//跳过执行
+		return
+	}
+	jobExecuteInfo=common.BuildJobExecuteInfo(plan)
+	scheduler.jobExecuteInfoTable[plan.Job.Name]=jobExecuteInfo
+	//todo 执行
+
+}
+
+
 //处理任务事件
 func (scheduler *Scheduler)handleJobEvent(jobEvent *common.JobEvent)  {
 	var (
@@ -98,9 +118,5 @@ func (scheduler *Scheduler)TrySchedule()(scheduleAfter time.Duration)  {
 	//下次调度时间间隔
 	scheduleAfter=(*nearTime).Sub(now)
 	return
-
-
-
-
 
 }

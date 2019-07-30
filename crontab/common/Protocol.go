@@ -18,6 +18,12 @@ type JobSchedulePlan struct {
 	Expr *cronexpr.Expression
 	NextTime time.Time
 }
+//任务执行状态
+type JobExecuteInfo struct {
+	Job *Job
+	PlanTime time.Time  //理论上的调度时间
+	RealTime time.Time
+}
 //HTTP接口应答
 type Response struct {
 	Errno int `json:"errno"`
@@ -81,6 +87,16 @@ func BuildJobSchedulePlan(job *Job)(jobSchedulePlan *JobSchedulePlan,err error) 
 	}
 	return
 }
+
+func BuildJobExecuteInfo( paln  *JobSchedulePlan) (jobExecuteInfo *JobExecuteInfo) {
+	jobExecuteInfo=&JobExecuteInfo{
+		Job:paln.Job,
+		PlanTime:paln.NextTime,
+		RealTime:time.Now(),
+	}
+	return
+}
+
 //检查cron表达式并返回下10次的执行时间
 func CheckCronExpr(mycronExp string)(nexts []string,err error)  {
 	var(
