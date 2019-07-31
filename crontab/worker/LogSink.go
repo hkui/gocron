@@ -50,7 +50,7 @@ func (logSink *LogSink)writeLoop()  {
 	for{
 		select{
 		case log=<-logSink.logChan:
-			
+
 		}
 	}
 }
