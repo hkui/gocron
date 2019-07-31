@@ -6,11 +6,11 @@ import (
 )
 
 type Config struct {
-	ApiPort int `json:"apiPort"`
-	ApiReadTimeout int64 `json:"apiReadTimeout"`
-	ApiWriteTimeout int64 `json:"apiWriteTimeout"`
+
 	EtcdEndpoints []string `json:"etcdEndpoints"`
 	EctdDialTimeout int64 `json:"ectdDialTimeout"`
+	MongodbUri []string  `json:"mongodbUri"`
+	MongodbConnectTimeout int64 `json:"mongodbConnectTimeout"`
 
 }
 var (

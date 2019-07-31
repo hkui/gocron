@@ -107,3 +107,35 @@ func (jobMgr *JobMgr)CreateJobLock(jobName string)(jobLock *JobLock)  {
 	return
 }
 
+//监听强杀
+func (jobMgr *JobMgr)WatchKiller()  {
+	var(
+		watchChan clientv3.WatchChan
+		watchResp clientv3.WatchResponse
+		watchEvent *clientv3.Event
+		job *common.Job
+		jobEvent *common.JobEvent
+	)
+	go func() {
+		watchChan=jobMgr.watcher.Watch(context.TODO(),common.JOB_KILLER_DIR,clientv3.WithPrefix())
+		for watchResp=range watchChan{
+			for _,watchEvent=range watchResp.Events{
+				switch watchEvent.Type {
+				case mvccpb.PUT:
+					//杀死任务只需要任务名即可
+					job=&common.Job{
+						Name:common.ExtraKillerName(string(watchEvent.Kv.Key)),
+					}
+					//构建event事件，
+					jobEvent=common.BuildJobEvent(common.JOB_EVENT_KILL,job)
+					G_scheduler.PushJobEvent(jobEvent)
+				case mvccpb.DELETE: //标记删除 不关心
+
+
+				}
+			}
+		}
+
+
+	}()
+}

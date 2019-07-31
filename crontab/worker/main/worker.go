@@ -47,6 +47,7 @@ func main() {
 	if err!=nil{
 		goto ERR
 	}
+	worker.G_jobMgr.WatchKiller()
 
 	for {
 		time.Sleep(1 * time.Second)

@@ -1,7 +1,6 @@
 package worker
 
 import (
-	"context"
 	"crontab/common"
 	"os/exec"
 	"time"
@@ -42,7 +41,7 @@ func (executor *Executor)ExecuteJob(jobExecuteInfo *common.JobExecuteInfo){
 			result.EndTime=time.Now()
 		}else{
 			result.StartTime=time.Now()
-			cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c",jobExecuteInfo.Job.Command)
+			cmd=exec.CommandContext(jobExecuteInfo.CancelCtx,"/bin/bash","-c",jobExecuteInfo.Job.Command)
 			output,err=cmd.CombinedOutput()
 			result.EndTime=time.Now()
 			result.Err=err

@@ -80,6 +80,9 @@ func (scheduler *Scheduler)handleJobEvent(jobEvent *common.JobEvent)  {
 		jobSchedulePlan *common.JobSchedulePlan
 		err error
 		jobExisted bool
+		jobExecuteinfo *common.JobExecuteInfo
+		jobExecuting bool
+
 	)
 
 	switch jobEvent.EventType {
@@ -87,13 +90,16 @@ func (scheduler *Scheduler)handleJobEvent(jobEvent *common.JobEvent)  {
 		if jobSchedulePlan,err=common.BuildJobSchedulePlan(jobEvent.Job);err!=nil{
 			return
 		}
-		fmt.Printf("添加了 %s\n",jobEvent.Job.Name)
 		scheduler.jobPlanTable[jobEvent.Job.Name]=jobSchedulePlan
 
 	case common.JOB_EVENT_DELETE:
 		if jobSchedulePlan,jobExisted=scheduler.jobPlanTable[jobEvent.Job.Name];jobExisted{
 			fmt.Println("删除了",jobEvent.Job.Name)
 			delete(scheduler.jobPlanTable,jobEvent.Job.Name)
+		}
+	case common.JOB_EVENT_KILL:
+		if jobExecuteinfo,jobExecuting=scheduler.jobExecuteInfoTable[jobEvent.Job.Name];jobExecuting{
+			jobExecuteinfo.CancelFunc()
 		}
 
 	}
@@ -143,7 +149,27 @@ func (scheduler *Scheduler)PushJobResult(result *common.JobExecuteResult)  {
 func (scheduler *Scheduler)HandleJobResult(result *common.JobExecuteResult)  {
 	//删除执行状态
 	delete(scheduler.jobExecuteInfoTable,result.ExecuteInfo.Job.Name)
-	fmt.Printf("任务执行完成:job=%s,output=%s,err=%v",result.ExecuteInfo.Job.Name,string(result.Output),result.Err)
+	fmt.Printf("完成:job=%s,output=%s,err=%v",result.ExecuteInfo.Job.Name,string(result.Output),result.Err)
+	var (
+		jobLog *common.JobLog
+	)
+	if result.Err!=common.ERR_LOCK_ALREADY_REQUIRED{
+		jobLog=&common.JobLog{
+			JobName:result.ExecuteInfo.Job.Name,
+			Command:result.ExecuteInfo.Job.Command,
+			OutPut:string(result.Output),
+			PlanTime:result.ExecuteInfo.PlanTime.UnixNano()/1000/1000,
+			ScheduleTime:result.StartTime.UnixNano()/1000/1000,
+			StartTime:result.StartTime.UnixNano()/1000/1000,
+			EndTime:result.EndTime.UnixNano()/1000/1000,
 
+		}
+		if result.Err!=nil{
+			jobLog.Err=result.Err.Error()
+		}else{
+			jobLog.Err=""
+		}
+		//todo 存储到mongodb
+	}
 
 }

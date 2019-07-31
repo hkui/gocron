@@ -8,6 +8,7 @@ const (
 	JOB_EVENT_SAVE=1
 	//任务删除
 	JOB_EVENT_DELETE=2
+	JOB_EVENT_KILL=3
 
 
 )
