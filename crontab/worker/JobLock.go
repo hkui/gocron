@@ -18,9 +18,9 @@ type JobLock struct {
 
 func InitJobLock(jobName string,kv clientv3.KV,lease clientv3.Lease)(jobLock *JobLock){
 	jobLock=&JobLock{
+		jobName:jobName,
 		kv:kv,
 		lease:lease,
-		jobName:jobName,
 	}
 	return
 }

@@ -39,7 +39,7 @@ func (scheduler *Scheduler)scheduleLoop()  {
 	for{
 		select {
 			case jobEvent=<-scheduler.jobEventChan:
-				scheduler.handleJobEvent(jobEvent)
+				scheduler.handleJobEvent(jobEvent)  // 计划调度表的curd
 			case <-scheduleTimer.C://最近的任务到期了
 				fmt.Println("timer",scheduleAfter)
 			case jobResult=<-scheduler.jobResultChan:
