@@ -11,6 +11,8 @@ type Config struct {
 	EctdDialTimeout int64 `json:"ectdDialTimeout"`
 	MongodbUri []string  `json:"mongodbUri"`
 	MongodbConnectTimeout int64 `json:"mongodbConnectTimeout"`
+	JobLogCommitTimeout int64 `json:"jobLogCommitTimeout"`
+	JobLogBatchSize int `json:"jobLogBatchSize"`
 
 }
 var (

@@ -148,3 +148,8 @@ func CheckCronExpr(mycronExp string)(nexts []string,err error)  {
 	}
 	return
 }
+// 日志批次
+type LogBatch struct {
+	Logs []interface{}	// 多条日志
+}
+

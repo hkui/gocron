@@ -157,6 +157,7 @@ func (JobMgr *JobMgr)JobOne(name string)(jobOne *common.Job,err error)  {
 	}
 	return
 }
+
 func (jobNgr *JobMgr)CheckCronExpr(cronExpr string)(nexts []string,err error)  {
 	nexts,err=common.CheckCronExpr(cronExpr)
 	return
