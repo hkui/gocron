@@ -68,7 +68,7 @@ func (scheduler *Scheduler)TryStartJob(plan *common.JobSchedulePlan)  {
 	//保存执行状态
 	scheduler.jobExecuteInfoTable[plan.Job.Name]=jobExecuteInfo
 	//执行任务
-	fmt.Println("执行任务:",jobExecuteInfo.Job.Name,jobExecuteInfo.PlanTime,jobExecuteInfo.RealTime)
+	fmt.Println("执行任务:",jobExecuteInfo.Job.Name)
 	G_executor.ExecuteJob(jobExecuteInfo)
 
 }
@@ -124,8 +124,6 @@ func (scheduler *Scheduler)TrySchedule()(scheduleAfter time.Duration)  {
 	//遍历所有任务
 	for _,jobPlan=range scheduler.jobPlanTable{
 		if jobPlan.NextTime.Before(now)||jobPlan.NextTime.Equal(now){
-			//todo 尝试执行任务
-			fmt.Println("将要执行",jobPlan.Job.Name,time.Now())
 			scheduler.TryStartJob(jobPlan)
 			jobPlan.NextTime=jobPlan.Expr.Next(now)
 			//统计最近一个要过期的任务事件
@@ -149,7 +147,7 @@ func (scheduler *Scheduler)PushJobResult(result *common.JobExecuteResult)  {
 func (scheduler *Scheduler)HandleJobResult(result *common.JobExecuteResult)  {
 	//删除执行状态
 	delete(scheduler.jobExecuteInfoTable,result.ExecuteInfo.Job.Name)
-	fmt.Printf("完成:job=%s,output=%s,err=%v",result.ExecuteInfo.Job.Name,string(result.Output),result.Err)
+	fmt.Printf("完成:job=%s,output=%s,err=%v\n",result.ExecuteInfo.Job.Name,string(result.Output),result.Err)
 	var (
 		jobLog *common.JobLog
 	)
@@ -169,7 +167,8 @@ func (scheduler *Scheduler)HandleJobResult(result *common.JobExecuteResult)  {
 		}else{
 			jobLog.Err=""
 		}
-		//todo 存储到mongodb
+		fmt.Println("添加日志")
+		G_logSink.Append(jobLog)
 	}
 
 }

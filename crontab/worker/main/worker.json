@@ -8,7 +8,7 @@
   "ectdDialTimeout": 5000,
 
   "mongodb地址": "多个",
-  "mongodbUri": "[39.100.78.46:27017]",
+  "mongodbUri": ["39.100.78.46:27017"],
 
   "mongodb连接超时":"单位毫秒",
   "mongodbConnectTimeout": 5000,
@@ -17,5 +17,5 @@
   "JobLogCommitTimeout":1000,
 
   "mongodb日志提交缓存大小": "单位个数",
-  "JobLogBatchSize":100
+  "JobLogBatchSize":10
 }

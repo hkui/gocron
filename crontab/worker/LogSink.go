@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"crontab/common"
+	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
@@ -18,7 +19,7 @@ var(
 	G_logSink *LogSink
 )
 
-func InitLogSink(err error)  {
+func InitLogSink() (err error) {
 	var (
 		client *mongo.Client
 	)
@@ -40,8 +41,11 @@ func InitLogSink(err error)  {
 		client:client,
 		logCollection:client.Database("cron").Collection("log"),
 		logChan:make(chan *common.JobLog,100),
+		autoCommitChan:make(chan *common.LogBatch,1000),
 
 	}
+	go G_logSink.writeLoop()
+	return
 
 }
 func (logSink *LogSink) writeLoop() {
@@ -67,7 +71,7 @@ func (logSink *LogSink) writeLoop() {
 					}(logBatch),
 				)
 			}
-
+			fmt.Printf("追加日志:%++v\n",log)
 			// 把新日志追加到批次中
 			logBatch.Logs = append(logBatch.Logs, log)
 
@@ -92,6 +96,22 @@ func (logSink *LogSink) writeLoop() {
 		}
 	}
 }
-func (logSink *LogSink) saveLogs(batch *common.LogBatch){
 
+func (logSink *LogSink)Append( log *common.JobLog)  {
+	select {
+		case logSink.logChan<-log:  //队列满了就会阻塞,走到default,开始下一个监听
+
+	default:
+
+	}
+
+}
+// 批量写入日志
+func (logSink *LogSink) saveLogs(batch *common.LogBatch)(err error) {
+	fmt.Println("开始存储日志")
+	_,err=logSink.logCollection.InsertMany(context.TODO(), batch.Logs)
+	if err!=nil {
+		fmt.Println(err)
+	}
+	return
 }
