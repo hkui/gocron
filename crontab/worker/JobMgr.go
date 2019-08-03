@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
-	"time"
 )
 type JobMgr struct {
 	client *clientv3.Client
@@ -20,16 +19,10 @@ var (
 //初始化管理器
 func InitJobMgr() (err error) {
 	var(
-		config clientv3.Config
 		client *clientv3.Client
 	)
-	config=clientv3.Config{
-		Endpoints:G_config.EtcdEndpoints,//集群地址
-		DialTimeout:time.Millisecond*time.Duration(G_config.EctdDialTimeout),
-	}
 	//建立连接
-
-	if client,err=clientv3.New(config);err!=nil{
+	if client,err=common.GetEtcdClient(G_config.EtcdEndpoints,G_config.EctdDialTimeout);err!=nil{
 		return
 	}
 	G_jobMgr=&JobMgr{
@@ -39,7 +32,6 @@ func InitJobMgr() (err error) {
 		watcher:client.Watcher,
 	}
 	return
-
 }
 
 //监听任务变化

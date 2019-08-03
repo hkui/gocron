@@ -1,16 +1,13 @@
 package main
 
 import (
+	"crontab/common"
 	"crontab/master"
 	"flag"
 	"fmt"
-	"runtime"
 	"time"
 )
 
-func initEnv() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-}
 
 var (
 	confFile string
@@ -22,16 +19,16 @@ func initArgs() {
 	flag.Parse()
 }
 func main() {
-
 	var (
 		err error
 	)
 	initArgs()
 	//初始化线程
-	initEnv()
+	common.InitEnv()
 	if err = master.InitConfig(confFile); err != nil {
 		goto ERR
 	}
+	//对etcd的curd操作
 	if err = master.InitJobMgr(); err != nil {
 		goto ERR
 	}

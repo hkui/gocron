@@ -71,7 +71,7 @@ func (logSink *LogSink) writeLoop() {
 					}(logBatch),
 				)
 			}
-			fmt.Printf("追加日志:%++v\n",log)
+			fmt.Printf("追加日志:%++v\n",log.JobName)
 			// 把新日志追加到批次中
 			logBatch.Logs = append(logBatch.Logs, log)
 

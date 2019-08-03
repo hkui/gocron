@@ -1,16 +1,12 @@
 package main
 
 import (
+	"crontab/common"
 	"crontab/worker"
 	"flag"
 	"fmt"
-	"runtime"
 	"time"
 )
-
-func initEnv() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-}
 var (
 	confFile string
 )
@@ -26,11 +22,11 @@ func main() {
 	)
 	initArgs()
 	//初始化线程
-	initEnv()
+	common.InitEnv()
 	if err = worker.InitConfig(confFile); err != nil {
 		goto ERR
 	}
-	//启动执行器
+	//启动执行器（执行shell命令）
 	if err=worker.InitExecutor();err!=nil{
 		goto ERR
 	}
@@ -41,12 +37,10 @@ func main() {
 	if err=worker.InitLogSink();err!=nil{
 		goto ERR
 	}
-
 	//初始化任务管理器
 	if err=worker.InitJobMgr();err!=nil{
 		goto ERR
 	}
-
 	err=worker.G_jobMgr.WatchJobs()
 	if err!=nil{
 		goto ERR

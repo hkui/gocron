@@ -21,7 +21,7 @@ func main() {
 
 
 	kv:=clientv3.NewKV(Connectclient)
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
 	//写
 	//Resp,err:=kv.Put(ctx,"/cron/jobs/job2","job2",clientv3.WithPrevKV())
@@ -29,7 +29,14 @@ func main() {
 	//Resp,err:=kv.Get(ctx,"/cron/jobs/job2")
 
 	//读某个前缀的
-	Resp,err:=kv.Get(ctx,"/cron/jobs/",clientv3.WithPrefix())
+
+	Resp,err:=kv.Get(ctx,"/cron/jobs/",
+		clientv3.WithPrefix(),
+		clientv3.WithSort(clientv3.SortByModRevision,clientv3.SortAscend),
+		clientv3.WithLimit(6),
+
+
+	)
 
 	cancel()
 
@@ -37,8 +44,12 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
 	//读
 	fmt.Printf("%+v\n",Resp.Kvs)
+	for k,v:=range Resp.Kvs{
+		fmt.Println(k,v)
+	}
 
 
 

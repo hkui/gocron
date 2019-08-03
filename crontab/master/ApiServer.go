@@ -13,7 +13,6 @@ import (
 type ApiServer struct {
 	httpServer *http.Server
 }
-
 var (
 	G_apiServer *ApiServer
 )
@@ -37,7 +36,6 @@ func InitApiServer() (err error) {
 	staticDir=http.Dir(G_config.Webroot)
 	staticHandler=http.FileServer(staticDir)
 	mux.Handle("/",http.StripPrefix("/",staticHandler))
-
 
 	//启动tcp监听
 	if listener, err = net.Listen("tcp", ":"+strconv.Itoa(G_config.ApiPort)); err != nil {
@@ -145,7 +143,6 @@ func handleJobList(resp http.ResponseWriter, req *http.Request) {
 	if jobList, err = G_jobMgr.JobList(); err != nil {
 		goto ERR
 	}
-
 	if bytes, err = common.BuildResponse(0, "success", jobList); err == nil {
 
 		if _, err = resp.Write(bytes); err != nil {

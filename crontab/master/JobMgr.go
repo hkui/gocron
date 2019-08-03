@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
-	"time"
 )
 type JobMgr struct {
 	client *clientv3.Client
@@ -19,18 +18,12 @@ var (
 //初始化管理器
 func InitJobMgr() (err error) {
 	var(
-		config clientv3.Config
 		client *clientv3.Client
 		kv clientv3.KV
 		lease clientv3.Lease
 	)
-	config=clientv3.Config{
-		Endpoints:G_config.EtcdEndpoints,//集群地址
-		DialTimeout:time.Millisecond*time.Duration(G_config.EctdDialTimeout),
-	}
 	//建立连接
-
-	if client,err=clientv3.New(config);err!=nil{
+	if client,err=common.GetEtcdClient(G_config.EtcdEndpoints,G_config.EctdDialTimeout);err!=nil{
 		return
 	}
 	kv=client.KV
@@ -49,7 +42,6 @@ func (JobMgr *JobMgr)SaveJob(job *common.Job) (oldJob *common.Job,err error) {
 		jobValue []byte
 		putResp *clientv3.PutResponse
 		oldJobObj common.Job
-
 	)
 
 	jobKey=common.JOB_SAVE_DIR+job.Name
@@ -102,7 +94,11 @@ func (JobMgr *JobMgr)JobList()(jobList[]common.Job,err error)  {
 	)
 	jobKey=common.JOB_SAVE_DIR
 	jobList=make([]common.Job,0)
-	if getResp,err=JobMgr.kv.Get(context.TODO(),jobKey,clientv3.WithPrefix());err!=nil{
+	if getResp,err=JobMgr.kv.Get(
+		context.TODO(),
+		jobKey,clientv3.WithPrefix(),
+		clientv3.WithSort(clientv3.SortByModRevision,clientv3.SortDescend),
+		);err!=nil{
 		return
 	}
 
@@ -141,8 +137,6 @@ func (JobMgr *JobMgr)JobOne(name string)(jobOne *common.Job,err error)  {
 		jobKey string
 		getResp *clientv3.GetResponse
 
-
-		//job common.Job
 	)
 	jobKey=common.JOB_SAVE_DIR+name
 

@@ -4,10 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/gorhill/cronexpr"
+	"runtime"
 	"strings"
 	"time"
 )
-
+func InitEnv() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+}
 type Job struct {
 	Name string `json:"name"`
 	Command string `json:"command"`
