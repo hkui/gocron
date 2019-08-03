@@ -135,10 +135,8 @@
         $("#job-list").on("click", ".kill-job", function (event) {
             var tr=$(this).closest("tr");
             var job_name = tr.find(".job-name").attr("attr_job_name")
-            layer.confirm('确定要强杀吗'+job_name+'?', {
-                btn: ['确定','取消'] //按钮
-            }, function(){
-                $.ajax({
+
+            $.ajax({
                     url: "/job/kill",
                     type:'POST',
                     data:'name='+job_name,
@@ -148,11 +146,6 @@
                     }
 
                 })
-
-            }, function(){
-                layer.closeAll();
-            });
-
         })
 
     })

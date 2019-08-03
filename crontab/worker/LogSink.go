@@ -102,13 +102,13 @@ func (logSink *LogSink)Append( log *common.JobLog)  {
 		case logSink.logChan<-log:  //队列满了就会阻塞,走到default,开始下一个监听
 
 	default:
-
+		fmt.Printf("丢弃日志%v\n",log.JobName)
 	}
 
 }
 // 批量写入日志
 func (logSink *LogSink) saveLogs(batch *common.LogBatch)(err error) {
-	fmt.Println("开始存储日志")
+	fmt.Println("入库",len(batch.Logs),"条日志")
 	_,err=logSink.logCollection.InsertMany(context.TODO(), batch.Logs)
 	if err!=nil {
 		fmt.Println(err)

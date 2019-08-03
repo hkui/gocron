@@ -76,7 +76,6 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 	//job:{"name":"job1","command":"echo php","cronExpr":"*/5 * * * * * *"}
 	postJob = req.PostForm.Get("job")
 
-
 	if err = json.Unmarshal([]byte(postJob), &job); err != nil {
 		goto ERR
 	}
@@ -130,7 +129,7 @@ ERR:
 	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	} else {
-		log.Println(err,log.Lshortfile)
+		log.Println(err)
 	}
 }
 
@@ -240,6 +239,7 @@ ERR:
 	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	} else {
+		 log.SetFlags(log.Lshortfile | log.LstdFlags)
 		log.Println(err)
 	}
 

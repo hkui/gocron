@@ -14,7 +14,7 @@
   "mongodbConnectTimeout": 5000,
 
   "mongodb日志提交间隔": "单位毫秒",
-  "JobLogCommitTimeout":1000,
+  "JobLogCommitTimeout":10000,
 
   "mongodb日志提交缓存大小": "单位个数",
   "JobLogBatchSize":10

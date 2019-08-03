@@ -147,7 +147,10 @@ func (scheduler *Scheduler)PushJobResult(result *common.JobExecuteResult)  {
 func (scheduler *Scheduler)HandleJobResult(result *common.JobExecuteResult)  {
 	//删除执行状态
 	delete(scheduler.jobExecuteInfoTable,result.ExecuteInfo.Job.Name)
-	fmt.Printf("完成:job=%s,output=%s,err=%v\n",result.ExecuteInfo.Job.Name,string(result.Output),result.Err)
+	fmt.Printf("完成:job=%s,output=%s\n",result.ExecuteInfo.Job.Name,string(result.Output))
+	if( result.Err!=nil){
+		fmt.Printf("ERR=%v\n",result.Err)
+	}
 	var (
 		jobLog *common.JobLog
 	)
@@ -167,7 +170,6 @@ func (scheduler *Scheduler)HandleJobResult(result *common.JobExecuteResult)  {
 		}else{
 			jobLog.Err=""
 		}
-		fmt.Println("添加日志")
 		G_logSink.Append(jobLog)
 	}
 

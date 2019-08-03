@@ -81,7 +81,7 @@
             url: '/job/save',
             type: 'POST',
             dataType: 'json',
-            data: 'job=' + JSON.stringify(postData),
+            data: 'job=' + encodeURIComponent(JSON.stringify(postData)),
             success: function (res) {
                 layer.msg(res.msg, {icon: 1});
                 setTimeout(function () {
