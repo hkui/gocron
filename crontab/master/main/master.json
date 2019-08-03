@@ -15,7 +15,12 @@
   "ectdDialTimeout": 5000,
 
   "web页面根目录": "",
-  "webroot": "./webroot"
+  "webroot": "./webroot",
+
+  "mongodb地址": "多个",
+  "mongodbUri": ["39.100.78.46:27017"],
 
 
+  "mongodb连接超时":"单位毫秒",
+  "mongodbConnectTimeout": 5000
 }

@@ -5,7 +5,6 @@ import (
 	"crontab/common"
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
@@ -23,18 +22,7 @@ func InitLogSink() (err error) {
 	var (
 		client *mongo.Client
 	)
-	ctx,_:=context.WithTimeout(context.Background(),10*time.Second)
-
-	client,err=mongo.Connect(ctx,&options.ClientOptions{
-		Hosts:G_config.MongodbUri,
-
-	})
-	if err!=nil{
-		return
-	}
-	//检查连接
-	err=client.Ping(context.TODO(),nil)
-	if err!=nil{
+	if client,err=common.GetMongoClient(G_config.MongodbUri);err!=nil{
 		return
 	}
 	G_logSink=&LogSink{

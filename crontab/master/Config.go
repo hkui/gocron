@@ -12,6 +12,8 @@ type Config struct {
 	EtcdEndpoints []string `json:"etcdEndpoints"`
 	EctdDialTimeout int64 `json:"ectdDialTimeout"`
 	Webroot string `json:"webroot"`
+	MongodbUri []string  `json:"mongodbUri"`
+	MongodbConnectTimeout int64 `json:"mongodbConnectTimeout"`
 }
 var (
 	G_config *Config
