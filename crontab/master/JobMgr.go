@@ -53,7 +53,7 @@ func (JobMgr *JobMgr)SaveJob(job *common.Job) (oldJob *common.Job,err error) {
 	if err!=nil{
 		return
 	}
-	//如果是跟新
+	//如果是更新
 	if putResp.PrevKv!=nil{
 		if err=json.Unmarshal(putResp.PrevKv.Value,&oldJobObj);err!=nil{
 			err=nil
@@ -84,31 +84,54 @@ func (JobMgr *JobMgr)DeleteJob(name string) (oldJob *common.Job,err error){
 	}
 	return
 }
-func (JobMgr *JobMgr)JobList()(jobList[]common.Job,err error)  {
+func (JobMgr *JobMgr)JobList(MaxModVersion int64)(
+	jobListsRes common.JobListsRes,err error) {
 	var (
-		jobKey string
 		getResp *clientv3.GetResponse
-
 		kvPair *mvccpb.KeyValue
-		job common.Job
+		jobVersion common.JoblistOne
+		jobList []common.JoblistOne
+		maxModRevision int64
+		k int
+
 	)
-	jobKey=common.JOB_SAVE_DIR
-	jobList=make([]common.Job,0)
+
+	jobList=make([]common.JoblistOne,0)
+
 	if getResp,err=JobMgr.kv.Get(
 		context.TODO(),
-		jobKey,clientv3.WithPrefix(),
+		common.JOB_SAVE_DIR,
+		clientv3.WithPrefix(),
 		clientv3.WithSort(clientv3.SortByModRevision,clientv3.SortDescend),
+		clientv3.WithLimit(3),
+		clientv3.WithMaxModRev(MaxModVersion),
+
 		);err!=nil{
 		return
 	}
 
-	for _,kvPair=range getResp.Kvs{
-		if err=json.Unmarshal(kvPair.Value,&job);err==nil{
-			jobList=append(jobList,job)
+
+	for k,kvPair=range getResp.Kvs{
+		if k==0 {
+			maxModRevision=kvPair.ModRevision  //本页最大revison
+		}
+		if err=json.Unmarshal(kvPair.Value,&jobVersion);err==nil{
+			jobVersion.ModRevision=kvPair.ModRevision
+			jobList=append(jobList,jobVersion)
 		}else{
 			err=nil
 		}
 	}
+
+	jobListsRes=common.JobListsRes{
+		Lists:jobList,
+		Sum:getResp.Count,
+		HasNext:getResp.More,
+		HasPrev:getResp.Header.Revision>maxModRevision,
+		NextModRevision:jobList[len(jobList)-1].ModRevision-1, //下页最大一个revison
+		PrevModRevision:maxModRevision, //本页最大revison
+	}
+
 
 	return
 

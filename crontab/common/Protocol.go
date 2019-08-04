@@ -12,9 +12,24 @@ func InitEnv() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 }
 type Job struct {
-	Name string `json:"name"`
+	Name string `json:"name" bson:"name"`
 	Command string `json:"command"`
 	CronExpr string `json:"cronExpr"`
+}
+type JoblistOne struct {
+	Job
+	ModRevision int64
+}
+
+type JobListsRes struct {
+	Lists []JoblistOne `json:"lists"`
+	Sum int64		`json:"sum"`
+	HasNext bool `json:"has_next"`
+	HasPrev bool `json:"has_prev"`
+	NextModRevision int64 `json:"next_mod_revision"`
+	PrevModRevision int64 `json:"prev_mod_revision"`
+	
+
 }
 //调度计划
 type JobSchedulePlan struct {
@@ -48,15 +63,31 @@ type JobExecuteResult struct {
 	EndTime time.Time  //结束时间
 
 }
+// 任务执行日志
 type JobLog struct {
-	JobName string
-	Command string
-	Err string
-	OutPut string
-	PlanTime int64
-	ScheduleTime int64
-	StartTime int64
-	EndTime int64
+	JobName string `json:"jobName" bson:"jobName"` // 任务名字
+	Command string `json:"command" bson:"command"` // 脚本命令
+	Err string `json:"err" bson:"err"` // 错误原因
+	Output string `json:"output" bson:"output"`	// 脚本输出
+	PlanTime int64 `json:"planTime" bson:"planTime"` // 计划开始时间
+	ScheduleTime int64 `json:"scheduleTime" bson:"scheduleTime"` // 实际调度时间
+	StartTime int64 `json:"startTime" bson:"startTime"` // 任务执行开始时间
+	EndTime int64 `json:"endTime" bson:"endTime"` // 任务执行结束时间
+}
+type JobLogShow struct {
+	JobName string  `json:"jobName" bson:"jobName"`
+	Command string  `json:"command" bson:"command"`
+	Err string  `json:"err" bson:"err"`
+	Output string  `json:"output" bson:"output"`
+	PlanTime string `json:"planTime" bson:"planTime"`
+	ScheduleTime string `json:"scheduleTime" bson:"scheduleTime"`
+	StartTime string  `json:"startTime" bson:"startTime"`
+	EndTime string   `json:"endTime" bson:"endTime"`
+}
+
+func TimeToStr(time2 time.Time)(tstring string)  {
+	tstring=time2.Format("06/01/02 15:04:05.000")
+	return
 }
 
 //应答方法

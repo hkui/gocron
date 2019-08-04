@@ -33,10 +33,11 @@ func main() {
 	Resp,err:=kv.Get(ctx,"/cron/jobs/",
 		clientv3.WithPrefix(),
 		clientv3.WithSort(clientv3.SortByModRevision,clientv3.SortAscend),
-		clientv3.WithLimit(6),
-
+		clientv3.WithLimit(3),
+		clientv3.WithMinModRev(10338),
 
 	)
+
 
 	cancel()
 
@@ -46,7 +47,7 @@ func main() {
 	}
 
 	//读
-	fmt.Printf("%+v\n",Resp.Kvs)
+	fmt.Println(Resp.Count,Resp.More,Resp.Header)
 	for k,v:=range Resp.Kvs{
 		fmt.Println(k,v)
 	}

@@ -158,7 +158,7 @@ func (scheduler *Scheduler)HandleJobResult(result *common.JobExecuteResult)  {
 		jobLog=&common.JobLog{
 			JobName:result.ExecuteInfo.Job.Name,
 			Command:result.ExecuteInfo.Job.Command,
-			OutPut:string(result.Output),
+			Output:string(result.Output),
 			PlanTime:result.ExecuteInfo.PlanTime.UnixNano()/1000/1000,
 			ScheduleTime:result.StartTime.UnixNano()/1000/1000,
 			StartTime:result.StartTime.UnixNano()/1000/1000,

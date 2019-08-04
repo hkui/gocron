@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>golang</title>
+    <script src="/js/jquery.min.js"></script>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/js/bootstrap.bundle.js"></script>
+    <script src="/js/layer/layer.js"></script>
+    <link href="https://cdn.bootcss.com/font-awesome/5.10.0-12/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="pannel pannel-default" style="margin-top: 20px">
+                <div class="pannel-body">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>计划开始时间</th>
+                            <th>实际调度时间</th>
+                            <th>开始执行时间</th>
+                            <th>结束时间</th>
+                            <th>输出</th>
+                            <th>错误信息</th>
+                        </tr>
+                        </thead>
+                        <tbody id="log-list">
+                        <tr style="display: none">
+
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div id="page" style="text-align: center">
+                        <nav aria-label="Page navigation ">
+                            <ul class="pagination">
+                                <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div> <!-- row --->
+
+</div>
+<script type="text/html" id="trTpl">
+    <tr>
+        <td>{planTime}</td>
+        <td>{scheduleTime}</td>
+        <td>{startTime}</td>
+        <td>{endTime}</td>
+        <td><pre>{output}</pre></td>
+        <td>{err}</td>
+    </tr>
+</script>
+<script type="text/javascript">
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+        return (false);
+    }
+
+    $(function () {
+        function loglist() {
+            var job_name=getQueryVariable('name');
+            if(!job_name) return
+            $.ajax({
+                url: '/job/log?name='+job_name,
+                dataType: 'json',
+                success: function (res) {
+                    if (res.errno == 0) {
+                        var data = res.data;
+                        if (data.length > 0) {
+                            var trhtml = '';
+                            var tpl = $('#trTpl').html()
+                            for (var i in data) {
+                                var log = data[i];
+                                trhtml += tpl
+                                    .replace(/{planTime}/g, log['planTime'])
+                                    .replace('{scheduleTime}', log['scheduleTime'])
+                                    .replace('{startTime}', log['startTime'])
+                                    .replace('{endTime}', log['endTime'])
+                                    .replace('{output}', log['output'])
+                                    .replace('{err}', log['err'])
+                            }
+                            $('#log-list').html(trhtml)
+                        }
+                    } else {
+                        console.log(res)
+                    }
+                }
+            })
+        }
+
+        loglist();
+
+
+    })
+</script>
+
+</body>
+</html>

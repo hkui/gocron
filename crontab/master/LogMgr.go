@@ -5,6 +5,7 @@ import (
 	"crontab/common"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
 )
 
 // mongodb日志管理
@@ -34,7 +35,7 @@ func InitLogMgr() (err error) {
 }
 
 // 查看任务日志
-func (logMgr *LogMgr) ListLog(name string, skip int, limit int) (logArr []*common.JobLog, err error){
+func (logMgr *LogMgr) ListLog(name string, skip int, limit int) (logArr []*common.JobLogShow, err error){
 	var (
 		filter *common.JobLogFilter
 		logSort *common.SortLogByStartTime
@@ -44,7 +45,7 @@ func (logMgr *LogMgr) ListLog(name string, skip int, limit int) (logArr []*commo
 	)
 
 	// len(logArr)
-	logArr = make([]*common.JobLog, 0)
+	logArr = make([]*common.JobLogShow, 0)
 
 	// 过滤条件
 	filter = &common.JobLogFilter{JobName: name}
@@ -73,8 +74,19 @@ func (logMgr *LogMgr) ListLog(name string, skip int, limit int) (logArr []*commo
 			continue // 有日志不合法
 		}
 
-		logArr = append(logArr, jobLog)
+		logArr = append(logArr, &common.JobLogShow{
+			JobName:jobLog.JobName,
+			Command:jobLog.Command,
+			Err:jobLog.Err,
+			Output: jobLog.Output,
+			PlanTime:common.TimeToStr(time.Unix(0, jobLog.PlanTime*int64(time.Millisecond))),
+			ScheduleTime:common.TimeToStr(time.Unix(0, jobLog.ScheduleTime*int64(time.Millisecond))),
+			StartTime:common.TimeToStr(time.Unix(0, jobLog.StartTime*int64(time.Millisecond))),
+			EndTime:common.TimeToStr(time.Unix(0, jobLog.EndTime*int64(time.Millisecond))),
+
+		})
 	}
 	return
 }
+
 

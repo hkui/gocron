@@ -31,6 +31,7 @@ func InitApiServer() (err error) {
 	mux.HandleFunc("/job/list", handleJobList)
 	mux.HandleFunc("/job/kill", handleJobKill)
 	mux.HandleFunc("/job/one", handleJobOne)
+	mux.HandleFunc("/job/log", handleJobLog)
 	mux.HandleFunc("/job/checkexpcron", handleCheckJobCronExpr)
 
 	staticDir=http.Dir(G_config.Webroot)
@@ -135,19 +136,34 @@ ERR:
 
 func handleJobList(resp http.ResponseWriter, req *http.Request) {
 	var (
-		jobList []common.Job
 		err     error
 		bytes   []byte
+		sum int64
+		maxModv int64
+		maxModvString string
+		jobListsRes common.JobListsRes
 	)
-	if jobList, err = G_jobMgr.JobList(); err != nil {
+	if err = req.ParseForm(); err != nil {
 		goto ERR
 	}
-	if bytes, err = common.BuildResponse(0, "success", jobList); err == nil {
+	maxModvString=req.Form.Get("maxModv")
+	if maxModvString!=""{
+		if maxModv,err=strconv.ParseInt(maxModvString,10,64);err!=nil{
+			maxModv=0
+		}
+	}else{
+		maxModv=0
+	}
 
+
+	if jobListsRes, err = G_jobMgr.JobList(maxModv); err != nil {
+		goto ERR
+	}
+	sum=sum
+	if bytes, err = common.BuildResponse(0, "success", jobListsRes); err == nil {
 		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
 		}
-
 	} else {
 		log.Println(err)
 	}
@@ -239,9 +255,53 @@ ERR:
 	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	} else {
-		 log.SetFlags(log.Lshortfile | log.LstdFlags)
 		log.Println(err)
 	}
 
+}
+
+// 查询任务日志
+func handleJobLog(resp http.ResponseWriter, req *http.Request) {
+	var (
+		err error
+		name string // 任务名字
+		skipParam string// 从第几条开始
+		limitParam string // 返回多少条
+		skip int
+		limit int
+		logArr []*common.JobLogShow
+		bytes []byte
+	)
+
+	// 解析GET参数
+	if err = req.ParseForm(); err != nil {
+		goto ERR
+	}
+
+	// 获取请求参数 /job/log?name=job10&skip=0&limit=10
+	name = req.Form.Get("name")
+	skipParam = req.Form.Get("skip")
+	limitParam = req.Form.Get("limit")
+	if skip, err = strconv.Atoi(skipParam); err != nil {
+		skip = 0
+	}
+	if limit, err = strconv.Atoi(limitParam); err != nil {
+		limit = 20
+	}
+
+	if logArr, err = G_logMgr.ListLog(name, skip, limit); err != nil {
+		goto ERR
+	}
+
+	// 正常应答
+	if bytes, err = common.BuildResponse(0, "success", logArr); err == nil {
+		resp.Write(bytes)
+	}
+	return
+
+ERR:
+	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+		resp.Write(bytes)
+	}
 }
 

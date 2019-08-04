@@ -7,6 +7,12 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <script src="/js/bootstrap.bundle.js"></script>
     <script src="/js/layer/layer.js"></script>
+    <link href="https://cdn.bootcss.com/font-awesome/5.10.0-12/css/all.min.css" rel="stylesheet">
+    <style>
+        .pagePrev,.pageNext{
+            display: none;
+        }
+    </style>
 </head>
 <body>
 <div class="container-fluid">
@@ -54,6 +60,17 @@
                         </tr>
                         </tbody>
                     </table>
+                     <div id="page" style="text-align: center">
+                        <nav aria-label="Page navigation ">
+                            <ul class="pagination">
+                                <li class="page-item itemCount" ><a class="page-link">共5条</a></li>
+                                <li class="page-item"><a class="page-link" href="/index.html">首页</a></li>
+                                <li class="page-item pagePrev"><a class="page-link" href="#">上页</a></li>
+                                <li class="page-item pageNext"><a class="page-link" href="#">下页</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -66,33 +83,69 @@
         <td class="job-command">{job_command}</td>
         <td class="job-cronExpr">{job_cronExpr}</td>
         <td>
-            <div class="btn-toolbar">
-                <button class="btn btn-info edit-job">编辑</button>
-                <button class="btn btn-danger delete-job" style="margin:0 5px">删除</button>
-                <button class="btn btn-warning kill-job">强杀</button>
+            <div class="btn-toolbar oper-btn">
+                <button class="btn btn-info edit-job"><i class="fa fa-edit"></i></button>
+                <button class="btn btn-danger delete-job" style="margin:0 5px">
+                    <i class="fa fa-trash"></i>
+                </button>
+                <button class="btn btn-warning kill-job" style="margin:0 5px">强杀</button>
+                <button class="btn btn-primary log-job">日志</button>
             </div>
         </td>
     </tr>
 </script>
 <script type="text/javascript">
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+        return '';
+    }
     $(function () {
         function joblist() {
             $.ajax({
-                url: '/job/list',
+                url: '/job/list?prevModv='+getQueryVariable('prevModv')+'&maxModv='+getQueryVariable('maxModv'),
                 dataType: 'json',
                 success: function (res) {
                     if (res.errno == 0) {
                         var data = res.data;
-                        if (data.length > 0) {
+                        if (data.sum > 0) {
                             var trhtml = '';
                             var tpl = $('#trTpl').html()
-                            for (var i in data) {
-                                var job = data[i];
-                                trhtml += tpl.replace(/{job_name}/g, job['name']).replace('{job_command}', job['command']).replace('{job_cronExpr}', job['cronExpr'])
+                            var lists=data['lists'];
+                            for (var i in lists) {
+                                var job = lists[i];
+                                trhtml += tpl.replace(/{job_name}/g, job['name'])
+                                    .replace('{job_command}', job['command'])
+                                    .replace('{job_cronExpr}', job['cronExpr'])
                             }
                             $('#job-list').html(trhtml)
+                            $('.itemCount a').html("共"+data.sum+'条')
+                            if(data.has_next){
+                                var next_url="/index.html?maxModv="+data.next_mod_revision+'&prevModv='+data.prev_mod_revision
+                                $('.pageNext a').attr('href',next_url)
+                                $('.pageNext').show()
+                            }else{
+                                $('.pageNext').hide()
+                            }
+
+                            if(data.has_prev){
+                                var prev_url="/index.html?maxModv="+getQueryVariable('prevModv')
+                                $('.pagePrev a').attr('href',prev_url)
+                                $('.pagePrev').show()
+                            }else{
+                                $('.pagePrev').hide()
+                            }
                         }
                     } else {
+                        $('#job-list').html('')
+                        $('.pageNext').hide()
+                        $('.pagePrev').hide()
                         console.log(res)
                     }
                 }
@@ -107,46 +160,61 @@
         })
 
         $("#job-list").on("click", ".delete-job", function (event) {
-            var tr=$(this).closest("tr");
+            var tr = $(this).closest("tr");
             var job_name = tr.find(".job-name").attr("attr_job_name")
-            layer.confirm('确定要删除'+job_name+'?', {
-                btn: ['确定','取消'] //按钮
-            }, function(){
+            layer.confirm('确定要删除' + job_name + '?', {
+                btn: ['确定', '取消'] //按钮
+            }, function () {
                 $.ajax({
                     url: "/job/delete",
-                    type:'POST',
-                    data:'name='+job_name,
+                    type: 'POST',
+                    data: 'name=' + job_name,
                     dataType: "json",
-                    success:function(res){
+                    success: function (res) {
                         layer.msg(res.msg, {icon: 1});
-                        if(res.errno==0){
+                        if (res.errno == 0) {
                             tr.remove();
                         }
                     }
 
                 })
 
-            }, function(){
+            }, function () {
                 layer.closeAll();
             });
 
 
         })
         $("#job-list").on("click", ".kill-job", function (event) {
-            var tr=$(this).closest("tr");
+            var tr = $(this).closest("tr");
             var job_name = tr.find(".job-name").attr("attr_job_name")
 
             $.ajax({
-                    url: "/job/kill",
-                    type:'POST',
-                    data:'name='+job_name,
-                    dataType: "json",
-                    success:function(res){
-                        layer.msg(res.msg, {icon: 1});
-                    }
+                url: "/job/kill",
+                type: 'POST',
+                data: 'name=' + job_name,
+                dataType: "json",
+                success: function (res) {
+                    layer.msg(res.msg, {icon: 1});
+                }
 
-                })
+            })
         })
+        $("#job-list").on("click", ".log-job", function (event) {
+            var tr = $(this).closest("tr");
+            var job_name = tr.find(".job-name").attr("attr_job_name")
+            layer.open({
+                type: 2,
+                title: job_name+'的日志',
+                shadeClose: true,
+                shade: 0.8,
+                area: ['80%', '90%'],
+                content: '/log.html?name='+job_name
+            });
+
+
+        })
+
 
     })
 </script>
