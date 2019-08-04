@@ -3,8 +3,11 @@ package main
 import (
 	"base/etcd/client"
 	"context"
+	"crontab/common"
+	"encoding/json"
 	"fmt"
 	"go.etcd.io/etcd/clientv3"
+	"sort"
 	"time"
 )
 
@@ -13,6 +16,8 @@ func main() {
 
 		Connectclient *clientv3.Client
 		err error
+		jobList common.JobList
+		jobListOne common.JobListOne
 
 	)
 	if Connectclient,err=client.GetClient();err!=nil{
@@ -34,6 +39,7 @@ func main() {
 		clientv3.WithPrefix(),
 		clientv3.WithSort(clientv3.SortByModRevision,clientv3.SortAscend),
 		clientv3.WithLimit(3),
+		clientv3.WithMaxModRev(0),
 		clientv3.WithMinModRev(10338),
 
 	)
@@ -48,9 +54,16 @@ func main() {
 
 	//读
 	fmt.Println(Resp.Count,Resp.More,Resp.Header)
-	for k,v:=range Resp.Kvs{
-		fmt.Println(k,v)
+	for _,kvPair:=range Resp.Kvs{
+		if err=json.Unmarshal(kvPair.Value,&jobListOne);err==nil{
+			jobListOne.ModRevision=kvPair.ModRevision
+			jobList=append(jobList,jobListOne)
+		}else{
+			err=nil
+		}
 	}
+	sort.Sort(common.JobList(jobList))
+	fmt.Printf("%++v\n",jobList)
 
 
 

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
+	"sort"
 )
 type JobMgr struct {
 	client *clientv3.Client
@@ -84,37 +85,44 @@ func (JobMgr *JobMgr)DeleteJob(name string) (oldJob *common.Job,err error){
 	}
 	return
 }
-func (JobMgr *JobMgr)JobList(MaxModVersion int64)(
+func (JobMgr *JobMgr)JobList(MaxModVersion int64,MinModVersion int64)(
 	jobListsRes common.JobListsRes,err error) {
 	var (
 		getResp *clientv3.GetResponse
 		kvPair *mvccpb.KeyValue
-		jobVersion common.JoblistOne
-		jobList []common.JoblistOne
+		jobVersion common.JobListOne
+		jobList []common.JobListOne
 		maxModRevision int64
-		k int
+		dataSort clientv3.SortOrder
 
 	)
 
-	jobList=make([]common.JoblistOne,0)
+	jobList=make([]common.JobListOne,0)
+
+	if MaxModVersion>0{
+		dataSort=clientv3.SortDescend
+	}else if MinModVersion>0 {
+		dataSort=clientv3.SortAscend
+	}else{
+		dataSort=clientv3.SortDescend
+	}
+
 
 	if getResp,err=JobMgr.kv.Get(
 		context.TODO(),
 		common.JOB_SAVE_DIR,
 		clientv3.WithPrefix(),
-		clientv3.WithSort(clientv3.SortByModRevision,clientv3.SortDescend),
+		clientv3.WithSort(clientv3.SortByModRevision,dataSort),
 		clientv3.WithLimit(3),
 		clientv3.WithMaxModRev(MaxModVersion),
+		clientv3.WithMinModRev(MinModVersion),
 
 		);err!=nil{
 		return
 	}
 
 
-	for k,kvPair=range getResp.Kvs{
-		if k==0 {
-			maxModRevision=kvPair.ModRevision  //本页最大revison
-		}
+	for _,kvPair=range getResp.Kvs{
 		if err=json.Unmarshal(kvPair.Value,&jobVersion);err==nil{
 			jobVersion.ModRevision=kvPair.ModRevision
 			jobList=append(jobList,jobVersion)
@@ -122,6 +130,10 @@ func (JobMgr *JobMgr)JobList(MaxModVersion int64)(
 			err=nil
 		}
 	}
+	if dataSort==clientv3.SortAscend{
+		sort.Sort(common.JobList(jobList))
+	}
+	maxModRevision=jobList[len(jobList)-1].ModRevision
 
 	jobListsRes=common.JobListsRes{
 		Lists:jobList,
@@ -129,7 +141,7 @@ func (JobMgr *JobMgr)JobList(MaxModVersion int64)(
 		HasNext:getResp.More,
 		HasPrev:getResp.Header.Revision>maxModRevision,
 		NextModRevision:jobList[len(jobList)-1].ModRevision-1, //下页最大一个revison
-		PrevModRevision:maxModRevision, //本页最大revison
+		PrevModRevision:maxModRevision+1, //上页最小revison
 	}
 
 

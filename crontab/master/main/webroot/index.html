@@ -109,7 +109,7 @@
     $(function () {
         function joblist() {
             $.ajax({
-                url: '/job/list?prevModv='+getQueryVariable('prevModv')+'&maxModv='+getQueryVariable('maxModv'),
+                url: '/job/list?maxModv='+getQueryVariable('maxModv')+'&minModv='+getQueryVariable('minModv'),
                 dataType: 'json',
                 success: function (res) {
                     if (res.errno == 0) {
@@ -127,7 +127,7 @@
                             $('#job-list').html(trhtml)
                             $('.itemCount a').html("共"+data.sum+'条')
                             if(data.has_next){
-                                var next_url="/index.html?maxModv="+data.next_mod_revision+'&prevModv='+data.prev_mod_revision
+                                var next_url="/index.html?maxModv="+data.next_mod_revision
                                 $('.pageNext a').attr('href',next_url)
                                 $('.pageNext').show()
                             }else{
@@ -135,7 +135,7 @@
                             }
 
                             if(data.has_prev){
-                                var prev_url="/index.html?maxModv="+getQueryVariable('prevModv')
+                                var prev_url="/index.html?minModv="+data.prev_mod_revision
                                 $('.pagePrev a').attr('href',prev_url)
                                 $('.pagePrev').show()
                             }else{

@@ -141,6 +141,10 @@ func handleJobList(resp http.ResponseWriter, req *http.Request) {
 		sum int64
 		maxModv int64
 		maxModvString string
+
+		minModv int64
+		minModvString string
+
 		jobListsRes common.JobListsRes
 	)
 	if err = req.ParseForm(); err != nil {
@@ -154,9 +158,17 @@ func handleJobList(resp http.ResponseWriter, req *http.Request) {
 	}else{
 		maxModv=0
 	}
+	minModvString=req.Form.Get("minModv")
+	if minModvString!=""{
+		if minModv,err=strconv.ParseInt(minModvString,10,64);err!=nil{
+			minModv=0
+		}
+	}else{
+		minModv=0
+	}
 
 
-	if jobListsRes, err = G_jobMgr.JobList(maxModv); err != nil {
+	if jobListsRes, err = G_jobMgr.JobList(maxModv,minModv); err != nil {
 		goto ERR
 	}
 	sum=sum

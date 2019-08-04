@@ -16,13 +16,23 @@ type Job struct {
 	Command string `json:"command"`
 	CronExpr string `json:"cronExpr"`
 }
-type JoblistOne struct {
+type JobListOne struct {
 	Job
 	ModRevision int64
 }
+type JobList []JobListOne
+
+func (s JobList) Len() int { return len(s) }
+
+func (s JobList) Swap(i, j int){ s[i], s[j] = s[j], s[i] }
+
+func (s JobList) Less(i, j int) bool { return s[i].ModRevision > s[j].ModRevision }
+
+
+
 
 type JobListsRes struct {
-	Lists []JoblistOne `json:"lists"`
+	Lists []JobListOne `json:"lists"`
 	Sum int64		`json:"sum"`
 	HasNext bool `json:"has_next"`
 	HasPrev bool `json:"has_prev"`
