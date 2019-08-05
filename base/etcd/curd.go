@@ -37,11 +37,12 @@ func main() {
 	Resp,err:=kv.Get(ctx,"/cron/jobs/",
 		clientv3.WithPrefix(),
 		clientv3.WithSort(clientv3.SortByModRevision,clientv3.SortAscend),
-		clientv3.WithLimit(3),
-		clientv3.WithMaxModRev(0),
-		clientv3.WithMinModRev(10338),
+		//clientv3.WithLimit(3),
+		//clientv3.WithMaxModRev(0),
+		//clientv3.WithMinModRev(10338),
 
 	)
+	fmt.Println(Resp.Header.Revision)
 
 
 	cancel()

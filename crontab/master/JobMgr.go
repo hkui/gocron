@@ -4,6 +4,7 @@ import (
 	"context"
 	"crontab/common"
 	"encoding/json"
+	"fmt"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"sort"
@@ -95,9 +96,11 @@ func (JobMgr *JobMgr)JobList(MaxModVersion int64,MinModVersion int64)(
 		maxModRevision int64
 		dataSort clientv3.SortOrder
 		hasNext bool
+		hasPrev bool
 
 	)
 	hasNext=false
+	hasPrev=false;
 	jobList=make([]common.JobListOne,0)
 
 	if MaxModVersion>0{
@@ -106,16 +109,16 @@ func (JobMgr *JobMgr)JobList(MaxModVersion int64,MinModVersion int64)(
 		dataSort=clientv3.SortAscend
 		hasNext=true
 	}else{
+		hasPrev=false
 		dataSort=clientv3.SortDescend
 	}
-
 
 	if getResp,err=JobMgr.kv.Get(
 		context.TODO(),
 		common.JOB_SAVE_DIR,
 		clientv3.WithPrefix(),
 		clientv3.WithSort(clientv3.SortByModRevision,dataSort),
-		clientv3.WithLimit(5),
+		clientv3.WithLimit(10),
 		clientv3.WithMaxModRev(MaxModVersion),
 		clientv3.WithMinModRev(MinModVersion),
 
@@ -139,14 +142,17 @@ func (JobMgr *JobMgr)JobList(MaxModVersion int64,MinModVersion int64)(
 	if getResp.More{
 		hasNext=true
 	}
+	if len(jobList) >0{
+		maxModRevision=jobList[0].ModRevision //本页最大revision
+	}
 
-	maxModRevision=jobList[0].ModRevision
+	fmt.Println(maxModRevision,getResp.Header.Revision)
 
 	jobListsRes=common.JobListsRes{
 		Lists:jobList,
 		Sum:getResp.Count,
 		HasNext:hasNext,
-		HasPrev:getResp.Header.Revision>maxModRevision,
+		HasPrev:hasPrev,
 		NextModRevision:jobList[len(jobList)-1].ModRevision-1, //下页最大一个revison
 		PrevModRevision:maxModRevision+1, //上页最小revison
 	}
