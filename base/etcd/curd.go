@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"go.etcd.io/etcd/clientv3"
-	"sort"
 	"time"
 )
 
@@ -58,12 +57,13 @@ func main() {
 		if err=json.Unmarshal(kvPair.Value,&jobListOne);err==nil{
 			jobListOne.ModRevision=kvPair.ModRevision
 			jobList=append(jobList,jobListOne)
+			fmt.Println(kvPair)
 		}else{
 			err=nil
 		}
 	}
-	sort.Sort(common.JobList(jobList))
-	fmt.Printf("%++v\n",jobList)
+	//sort.Sort(common.JobList(jobList))
+	//fmt.Printf("%++v\n",jobList)
 
 
 

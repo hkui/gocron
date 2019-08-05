@@ -94,15 +94,17 @@ func (JobMgr *JobMgr)JobList(MaxModVersion int64,MinModVersion int64)(
 		jobList []common.JobListOne
 		maxModRevision int64
 		dataSort clientv3.SortOrder
+		hasNext bool
 
 	)
-
+	hasNext=false
 	jobList=make([]common.JobListOne,0)
 
 	if MaxModVersion>0{
 		dataSort=clientv3.SortDescend
 	}else if MinModVersion>0 {
 		dataSort=clientv3.SortAscend
+		hasNext=true
 	}else{
 		dataSort=clientv3.SortDescend
 	}
@@ -113,7 +115,7 @@ func (JobMgr *JobMgr)JobList(MaxModVersion int64,MinModVersion int64)(
 		common.JOB_SAVE_DIR,
 		clientv3.WithPrefix(),
 		clientv3.WithSort(clientv3.SortByModRevision,dataSort),
-		clientv3.WithLimit(3),
+		clientv3.WithLimit(5),
 		clientv3.WithMaxModRev(MaxModVersion),
 		clientv3.WithMinModRev(MinModVersion),
 
@@ -130,20 +132,24 @@ func (JobMgr *JobMgr)JobList(MaxModVersion int64,MinModVersion int64)(
 			err=nil
 		}
 	}
+
 	if dataSort==clientv3.SortAscend{
 		sort.Sort(common.JobList(jobList))
 	}
-	maxModRevision=jobList[len(jobList)-1].ModRevision
+	if getResp.More{
+		hasNext=true
+	}
+
+	maxModRevision=jobList[0].ModRevision
 
 	jobListsRes=common.JobListsRes{
 		Lists:jobList,
 		Sum:getResp.Count,
-		HasNext:getResp.More,
+		HasNext:hasNext,
 		HasPrev:getResp.Header.Revision>maxModRevision,
 		NextModRevision:jobList[len(jobList)-1].ModRevision-1, //下页最大一个revison
 		PrevModRevision:maxModRevision+1, //上页最小revison
 	}
-
 
 	return
 
