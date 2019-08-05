@@ -9,8 +9,16 @@
     <script src="/js/layer/layer.js"></script>
     <link href="https://cdn.bootcss.com/font-awesome/5.10.0-12/css/all.min.css" rel="stylesheet">
     <style>
-        .pagePrev,.pageNext{
+        .pagePrev, .pageNext {
             display: none;
+        }
+        .workerIp{
+            list-style: none;width: 150px;
+            text-align: center;
+            height: auto;
+        }
+        .workerIp li{
+            text-align: center;
         }
     </style>
 </head>
@@ -29,7 +37,10 @@
     <div class="row">
         <div class="col-md-12">
             <button type="button" class="btn btn-primary" onclick="window.location.href='/edit.html'">
-               <i class=" fa fa-plus-circle" style="margin-right: 5px;"></i>新建任务
+                <i class=" fa fa-plus-circle" style="margin-right: 5px;"></i>新建任务
+            </button>
+            <button type="button" class="btn btn-info health" style="float: right">
+                健康节点
             </button>
         </div>
     </div>
@@ -53,7 +64,7 @@
                         </tr>
                         </tbody>
                     </table>
-                     <div id="page" style="text-align: center">
+                    <div id="page" style="text-align: center">
                         <nav aria-label="Page navigation ">
                             <ul class="pagination"></ul>
                             <ul class="sum">总共0条</ul>
@@ -95,25 +106,27 @@
         }
         return '';
     }
-    function buildPageHtml(nowPage,SumPage,limit){
-        var lihtml='';
-        for (var i=1;i<=SumPage;i++){
-            if (i==nowPage){
-                var active='active';
-            }else{
-                active='';
+
+    function buildPageHtml(nowPage, SumPage, limit) {
+        var lihtml = '';
+        for (var i = 1; i <= SumPage; i++) {
+            if (i == nowPage) {
+                var active = 'active';
+            } else {
+                active = '';
             }
-            var url="/index.html?page="+i+'&limit='+limit
-            lihtml+='<li class="page-item '+active+'"><a class="page-link" href="'+url+'">'+i+'</a></li>';
+            var url = "/index.html?page=" + i + '&limit=' + limit
+            lihtml += '<li class="page-item ' + active + '"><a class="page-link" href="' + url + '">' + i + '</a></li>';
         }
         return lihtml
 
     }
-    var limit=getQueryVariable('limit');
+
+    var limit = getQueryVariable('limit');
     $(function () {
         function joblist() {
             $.ajax({
-                url: '/job/list?page='+getQueryVariable('page')+'&limit='+limit,
+                url: '/job/list?page=' + getQueryVariable('page') + '&limit=' + limit,
                 dataType: 'json',
                 success: function (res) {
                     if (res.errno == 0) {
@@ -121,7 +134,7 @@
                         if (data.sum > 0) {
                             var trhtml = '';
                             var tpl = $('#trTpl').html()
-                            var lists=data['lists'];
+                            var lists = data['lists'];
                             for (var i in lists) {
                                 var job = lists[i];
                                 trhtml += tpl.replace(/{job_name}/g, job['name'])
@@ -129,9 +142,9 @@
                                     .replace('{job_cronExpr}', job['cronExpr'])
                             }
                             $('#job-list').html(trhtml)
-                            $('.sum').html("总共"+data.sum+'条')
+                            $('.sum').html("总共" + data.sum + '条')
 
-                            $('.pagination').html(buildPageHtml(data.now_page,data.sum_page,limit))
+                            $('.pagination').html(buildPageHtml(data.now_page, data.sum_page, limit))
 
                         }
                     } else {
@@ -197,14 +210,43 @@
             var job_name = tr.find(".job-name").attr("attr_job_name")
             layer.open({
                 type: 2,
-                title: job_name+'的日志',
+                title: job_name + '的日志',
                 shadeClose: true,
                 shade: 0.8,
                 area: ['80%', '90%'],
-                content: '/log.html?name='+job_name
+                content: '/log.html?name=' + job_name
             });
 
 
+        })
+        $('.health').click(function () {
+            $.ajax({
+                url: '/job/workers',
+                dataType: 'json',
+                success: function (res) {
+                    if (res.errno == 0) {
+                        var data = res.data;
+                        var html = '<ul class="workerIp">';
+                        if (data.length > 0) {
+                            $.each(data, function (i, elem) {
+                                html += "<li>" + elem + "</li>"
+                            })
+
+                        }
+                        html += "</ul>"
+                        layer.open({
+                            title:'健康节点',
+                            type: 1,
+                            closeBtn: 1, //不显示关闭按钮
+                            // anim: 2,
+                            shadeClose: false, //开启遮罩关闭
+                            content: html
+                        });
+                    } else {
+                        alert(res.msg)
+                    }
+                }
+            })
         })
 
 

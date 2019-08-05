@@ -26,6 +26,9 @@ func main() {
 	if err = worker.InitConfig(confFile); err != nil {
 		goto ERR
 	}
+	if err=worker.InitRegister();err!=nil{
+		goto ERR
+	}
 	//启动执行器（执行shell命令）
 	if err=worker.InitExecutor();err!=nil{
 		goto ERR

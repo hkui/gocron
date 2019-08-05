@@ -32,6 +32,7 @@ func InitApiServer() (err error) {
 	mux.HandleFunc("/job/kill", handleJobKill)
 	mux.HandleFunc("/job/one", handleJobOne)
 	mux.HandleFunc("/job/log", handleJobLog)
+	mux.HandleFunc("/job/workers", handleWorkerList)
 	mux.HandleFunc("/job/checkexpcron", handleCheckJobCronExpr)
 
 	staticDir=http.Dir(G_config.Webroot)
@@ -306,6 +307,33 @@ func handleJobLog(resp http.ResponseWriter, req *http.Request) {
 ERR:
 	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
 		resp.Write(bytes)
+	}
+}
+
+func handleWorkerList(resp http.ResponseWriter, req *http.Request)  {
+	var (
+		err   error
+		bytes []byte
+		workers []string
+
+	)
+
+	if workers,err=G_workerMgr.ListWorkers();err!=nil{
+		goto ERR
+	}
+	if bytes, err = common.BuildResponse(0, "success", workers); err == nil {
+		if _,err= resp.Write(bytes);err!=nil{
+			log.Println(err)
+		}
+	} else {
+		log.Println(err)
+	}
+	return
+ERR:
+	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+		resp.Write(bytes)
+	} else {
+		log.Println(err)
 	}
 }
 

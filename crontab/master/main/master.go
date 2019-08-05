@@ -35,6 +35,9 @@ func main() {
 	if err=master.InitLogMgr();err!=nil{
 		goto ERR
 	}
+	if err=master.InitWorkerMgr();err!=nil{
+		goto ERR
+	}
 	//启动Api HTTP服务
 	if err = master.InitApiServer(); err != nil {
 		goto ERR

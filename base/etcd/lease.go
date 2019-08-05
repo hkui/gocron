@@ -25,7 +25,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 
 	//申请一个10s租约
-	leaseGrantResp,err:=lease.Grant(ctx,10)
+	leaseGrantResp,err:=lease.Grant(ctx,20)
 
 	cancel()
 	if err!=nil{
@@ -37,7 +37,7 @@ func main() {
 
 	ctx,cancelFun:=context.WithCancel(context.Background())
 	//5秒后停止续租
-	time.AfterFunc(5*time.Second, func() {
+	time.AfterFunc(1005*time.Second, func() {
 		cancelFun()
 	})
 
@@ -56,7 +56,7 @@ func main() {
 						fmt.Println("租约已失效")
 						goto  END
 					}else{
-						fmt.Println("收到续租应答",keepResp.ID)
+						fmt.Println("收到续租应答",keepResp.ID,time.Now())
 					}
 			}
 		}
@@ -84,7 +84,7 @@ func main() {
 			fmt.Println("kv 过期了")
 			break
 		}
-		fmt.Println("还没过期",getResp.Kvs)
+		fmt.Println("还没过期",time.Now())
 		time.Sleep(1*time.Second)
 	}
 
