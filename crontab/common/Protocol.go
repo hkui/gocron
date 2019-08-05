@@ -34,11 +34,9 @@ func (s JobList) Less(i, j int) bool { return s[i].ModRevision > s[j].ModRevisio
 type JobListsRes struct {
 	Lists []JobListOne `json:"lists"`
 	Sum int64		`json:"sum"`
-	HasNext bool `json:"has_next"`
-	HasPrev bool `json:"has_prev"`
-	NextModRevision int64 `json:"next_mod_revision"`
-	PrevModRevision int64 `json:"prev_mod_revision"`
-	
+	SumPage int64 `json:"sum_page"`
+	NowPage int64 `json:"now_page"`
+
 
 }
 //调度计划

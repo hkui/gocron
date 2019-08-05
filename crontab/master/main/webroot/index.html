@@ -28,7 +28,9 @@
     <!-- 功能按钮-->
     <div class="row">
         <div class="col-md-12">
-            <button type="button" class="btn btn-primary" onclick="window.location.href='/edit.html'">新建任务</button>
+            <button type="button" class="btn btn-primary" onclick="window.location.href='/edit.html'">
+               <i class=" fa fa-plus-circle" style="margin-right: 5px;"></i>新建任务
+            </button>
         </div>
     </div>
 
@@ -47,27 +49,14 @@
                         </thead>
                         <tbody id="job-list">
                         <tr style="display: none">
-                            <td class="job-name">job1</td>
-                            <td class="job-command">echo go</td>
-                            <td class="job-cronExpr">* * * * *</td>
-                            <td>
-                                <div class="btn-toolbar">
-                                    <button class="btn btn-info edit-job">编辑</button>
-                                    <button class="btn btn-danger delete-job" style="margin:0 5px">删除</button>
-                                    <button class="btn btn-warning kill-job">强杀</button>
-                                </div>
-                            </td>
+
                         </tr>
                         </tbody>
                     </table>
                      <div id="page" style="text-align: center">
                         <nav aria-label="Page navigation ">
-                            <ul class="pagination">
-                                <li class="page-item itemCount" ><a class="page-link">共5条</a></li>
-                                <li class="page-item"><a class="page-link" href="/index.html">首页</a></li>
-                                <li class="page-item pagePrev"><a class="page-link" href="#">上页</a></li>
-                                <li class="page-item pageNext"><a class="page-link" href="#">下页</a></li>
-                            </ul>
+                            <ul class="pagination"></ul>
+                            <ul class="sum">总共0条</ul>
                         </nav>
                     </div>
 
@@ -106,10 +95,25 @@
         }
         return '';
     }
+    function buildPageHtml(nowPage,SumPage,limit){
+        var lihtml='';
+        for (var i=1;i<=SumPage;i++){
+            if (i==nowPage){
+                var active='active';
+            }else{
+                active='';
+            }
+            var url="/index.html?page="+i+'&limit='+limit
+            lihtml+='<li class="page-item '+active+'"><a class="page-link" href="'+url+'">'+i+'</a></li>';
+        }
+        return lihtml
+
+    }
+    var limit=getQueryVariable('limit');
     $(function () {
         function joblist() {
             $.ajax({
-                url: '/job/list?maxModv='+getQueryVariable('maxModv')+'&minModv='+getQueryVariable('minModv'),
+                url: '/job/list?page='+getQueryVariable('page')+'&limit='+limit,
                 dataType: 'json',
                 success: function (res) {
                     if (res.errno == 0) {
@@ -125,22 +129,10 @@
                                     .replace('{job_cronExpr}', job['cronExpr'])
                             }
                             $('#job-list').html(trhtml)
-                            $('.itemCount a').html("共"+data.sum+'条')
-                            if(data.has_next){
-                                var next_url="/index.html?maxModv="+data.next_mod_revision
-                                $('.pageNext a').attr('href',next_url)
-                                $('.pageNext').show()
-                            }else{
-                                $('.pageNext').hide()
-                            }
+                            $('.sum').html("总共"+data.sum+'条')
 
-                            if(data.has_prev){
-                                var prev_url="/index.html?minModv="+data.prev_mod_revision
-                                $('.pagePrev a').attr('href',prev_url)
-                                $('.pagePrev').show()
-                            }else{
-                                $('.pagePrev').hide()
-                            }
+                            $('.pagination').html(buildPageHtml(data.now_page,data.sum_page,limit))
+
                         }
                     } else {
                         $('#job-list').html('')

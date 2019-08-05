@@ -4,10 +4,9 @@ import (
 	"context"
 	"crontab/common"
 	"encoding/json"
-	"fmt"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
-	"sort"
+	"math"
 )
 type JobMgr struct {
 	client *clientv3.Client
@@ -86,47 +85,31 @@ func (JobMgr *JobMgr)DeleteJob(name string) (oldJob *common.Job,err error){
 	}
 	return
 }
-func (JobMgr *JobMgr)JobList(MaxModVersion int64,MinModVersion int64)(
+func (JobMgr *JobMgr)JobList( page int64,limit int64 )(
 	jobListsRes common.JobListsRes,err error) {
 	var (
 		getResp *clientv3.GetResponse
 		kvPair *mvccpb.KeyValue
 		jobVersion common.JobListOne
 		jobList []common.JobListOne
-		maxModRevision int64
-		dataSort clientv3.SortOrder
-		hasNext bool
-		hasPrev bool
-
+		end int64
+		start int64
+		sumPage int64
 	)
-	hasNext=false
-	hasPrev=false;
-	jobList=make([]common.JobListOne,0)
-
-	if MaxModVersion>0{
-		dataSort=clientv3.SortDescend
-	}else if MinModVersion>0 {
-		dataSort=clientv3.SortAscend
-		hasNext=true
-	}else{
-		hasPrev=false
-		dataSort=clientv3.SortDescend
+	if page<1{
+		page=1
 	}
+
+	jobList=make([]common.JobListOne,0)
 
 	if getResp,err=JobMgr.kv.Get(
 		context.TODO(),
 		common.JOB_SAVE_DIR,
 		clientv3.WithPrefix(),
-		clientv3.WithSort(clientv3.SortByModRevision,dataSort),
-		clientv3.WithLimit(10),
-		clientv3.WithMaxModRev(MaxModVersion),
-		clientv3.WithMinModRev(MinModVersion),
-
+		clientv3.WithSort(clientv3.SortByModRevision,clientv3.SortDescend),
 		);err!=nil{
 		return
 	}
-
-
 	for _,kvPair=range getResp.Kvs{
 		if err=json.Unmarshal(kvPair.Value,&jobVersion);err==nil{
 			jobVersion.ModRevision=kvPair.ModRevision
@@ -136,25 +119,21 @@ func (JobMgr *JobMgr)JobList(MaxModVersion int64,MinModVersion int64)(
 		}
 	}
 
-	if dataSort==clientv3.SortAscend{
-		sort.Sort(common.JobList(jobList))
+	start=(page-1)*limit
+	if start>getResp.Count-1{
+		start=0
 	}
-	if getResp.More{
-		hasNext=true
+	end=start+limit
+	sumPage=int64(math.Ceil(float64(getResp.Count)/float64(limit)))
+	if end>getResp.Count{
+		end=getResp.Count
 	}
-	if len(jobList) >0{
-		maxModRevision=jobList[0].ModRevision //本页最大revision
-	}
-
-	fmt.Println(maxModRevision,getResp.Header.Revision)
 
 	jobListsRes=common.JobListsRes{
-		Lists:jobList,
+		Lists:jobList[start:end],
 		Sum:getResp.Count,
-		HasNext:hasNext,
-		HasPrev:hasPrev,
-		NextModRevision:jobList[len(jobList)-1].ModRevision-1, //下页最大一个revison
-		PrevModRevision:maxModRevision+1, //上页最小revison
+		SumPage:sumPage,
+		NowPage:page,
 	}
 
 	return

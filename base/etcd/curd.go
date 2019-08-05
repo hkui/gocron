@@ -64,7 +64,8 @@ func main() {
 		}
 	}
 	//sort.Sort(common.JobList(jobList))
-	//fmt.Printf("%++v\n",jobList)
+	fmt.Printf("%++v\n",jobList)
+	fmt.Printf("%++v\n",jobList[2:30])
 
 
 

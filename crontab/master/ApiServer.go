@@ -138,40 +138,29 @@ func handleJobList(resp http.ResponseWriter, req *http.Request) {
 	var (
 		err     error
 		bytes   []byte
-		sum int64
-		maxModv int64
-		maxModvString string
+		page int64
+		limit int64
 
-		minModv int64
-		minModvString string
 
 		jobListsRes common.JobListsRes
 	)
 	if err = req.ParseForm(); err != nil {
 		goto ERR
 	}
-	maxModvString=req.Form.Get("maxModv")
-	if maxModvString!=""{
-		if maxModv,err=strconv.ParseInt(maxModvString,10,64);err!=nil{
-			maxModv=0
-		}
+	if pageInt,err:= strconv.Atoi(req.Form.Get("page"));err==nil{
+		page=int64(pageInt)
 	}else{
-		maxModv=0
+		page=1
 	}
-	minModvString=req.Form.Get("minModv")
-	if minModvString!=""{
-		if minModv,err=strconv.ParseInt(minModvString,10,64);err!=nil{
-			minModv=0
-		}
+	if limitInt,err:= strconv.Atoi(req.Form.Get("limit"));err==nil{
+		limit=int64(limitInt)
 	}else{
-		minModv=0
+		limit=10
 	}
 
-
-	if jobListsRes, err = G_jobMgr.JobList(maxModv,minModv); err != nil {
+	if jobListsRes, err = G_jobMgr.JobList(page,limit); err != nil {
 		goto ERR
 	}
-	sum=sum
 	if bytes, err = common.BuildResponse(0, "success", jobListsRes); err == nil {
 		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
@@ -181,7 +170,10 @@ func handleJobList(resp http.ResponseWriter, req *http.Request) {
 	}
 
 ERR:
-	log.Println(err)
+	if err!=nil{
+		log.Println(err)
+	}
+
 
 }
 func handleJobKill(resp http.ResponseWriter, req *http.Request) {
