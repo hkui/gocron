@@ -108,6 +108,10 @@
     }
 
     function buildPageHtml(nowPage, SumPage, limit) {
+        if(!limit){
+            limit=10;
+        }
+        if(SumPage<2) return '';
         var lihtml = '';
         for (var i = 1; i <= SumPage; i++) {
             if (i == nowPage) {
@@ -232,14 +236,17 @@
                                 html += "<li>" + elem + "</li>"
                             })
 
+                        }else{
+                            html+="<li>无</li>";
                         }
                         html += "</ul>"
                         layer.open({
                             title:'健康节点',
                             type: 1,
+                            area: ['200px', 'auto'],
                             closeBtn: 1, //不显示关闭按钮
                             // anim: 2,
-                            shadeClose: false, //开启遮罩关闭
+                            shadeClose: true, //开启遮罩关闭
                             content: html
                         });
                     } else {

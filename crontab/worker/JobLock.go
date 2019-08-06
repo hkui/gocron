@@ -63,6 +63,7 @@ func (jobLock *JobLock) TryLock() (err error) {
 		}
 	END:
 	}()
+
 	//4 创建事务
 	txn = jobLock.kv.Txn(context.TODO())
 	lockKey = common.JOB_LOCK_DIR + jobLock.jobName

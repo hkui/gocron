@@ -49,6 +49,8 @@ func (executor *Executor)ExecuteJob(jobExecuteInfo *common.JobExecuteInfo){
 		}
 		//执行结束后把结果返回给调度器,调度器把任务从jobExecuteInfoTable 删除
 		G_scheduler.PushJobResult(result)
+		//省得多台机器 时间差值大 ，都抢到锁了
+		time.Sleep(1*time.Second)
 		//释放锁
 
 	}()
