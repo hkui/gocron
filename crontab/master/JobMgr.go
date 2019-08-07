@@ -7,6 +7,7 @@ import (
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"math"
+	"os/exec"
 )
 type JobMgr struct {
 	client *clientv3.Client
@@ -183,3 +184,20 @@ func (jobNgr *JobMgr)CheckCronExpr(cronExpr string)(nexts []string,err error)  {
 	return
 }
 
+
+func (JobMgr *JobMgr)Shells()(outputs []string ,err error){
+	var (
+		cmd *exec.Cmd
+		output []byte
+
+	)
+	//cmd=exec.Command("/bin/bash","-c","ls -al /")
+	cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c","php /code/yii/yii")
+	outputs=make([]string,0)
+
+	if output,err=cmd.CombinedOutput();err==nil{
+		println(output)
+	}
+
+	return
+}

@@ -34,6 +34,7 @@ func InitApiServer() (err error) {
 	mux.HandleFunc("/job/log", handleJobLog)
 	mux.HandleFunc("/job/workers", handleWorkerList)
 	mux.HandleFunc("/job/checkexpcron", handleCheckJobCronExpr)
+	mux.HandleFunc("/job/shells", handleShellList)
 
 	staticDir=http.Dir(G_config.Webroot)
 	staticHandler=http.FileServer(staticDir)
@@ -335,5 +336,11 @@ ERR:
 	} else {
 		log.Println(err)
 	}
+}
+
+//返回可选着的shell命令
+func handleShellList(resp http.ResponseWriter, req *http.Request) {
+	G_jobMgr.Shells()
+
 }
 

@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-
 var (
 	confFile string
 )
@@ -22,12 +21,13 @@ func main() {
 	var (
 		err error
 	)
-	initArgs()
 	//初始化线程
 	common.InitEnv()
+	initArgs()
 	if err = master.InitConfig(confFile); err != nil {
 		goto ERR
 	}
+
 	//对etcd的curd操作
 	if err = master.InitJobMgr(); err != nil {
 		goto ERR
