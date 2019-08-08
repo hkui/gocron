@@ -14,7 +14,7 @@ func main() {
 		err error
 	)
 	//cmd=exec.Command("/bin/bash","-c","ls -al /")
-	cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c","ls")
+	cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c","php /code/yii/yii")
 
 	if output,err=cmd.CombinedOutput();err!=nil{
 		fmt.Println(err)
