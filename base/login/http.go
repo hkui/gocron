@@ -1,29 +1,28 @@
 package main
 
 import (
-	"base/login/session"
-	"crypto/rand"
-	"encoding/base64"
+	"base/login/common"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
-	"net/url"
-	"sync"
-	"time"
 )
 
 
-
-
 func main() {
-	session.Init()
+
 	var(
+		providers map[string]common.Provider
 		mux *http.ServeMux
 		listener net.Listener
 		err error
 		httpServer *http.Server
 	)
+
+	providers = make(map[string]common.Provider)
+
+
+
+
 
 	mux=http.NewServeMux()
 	mux.HandleFunc("/login",login)
@@ -39,8 +38,8 @@ func main() {
 	if err!=nil{
 		panic(err)
 	}
-
 }
+
 func login(w http.ResponseWriter,  r *http.Request)  {
 	sess := G_session.SessionStart(w, r)
 	r.ParseForm()
@@ -48,7 +47,6 @@ func login(w http.ResponseWriter,  r *http.Request)  {
 	if name != nil {
 		sess.Set("username", r.Form["username"]) //将表单提交的username值设置到session中
 	}
-	w.Write(([]byte)("123"));
 }
 
 func get(resp http.ResponseWriter,  r *http.Request)()  {
@@ -69,6 +67,18 @@ func get(resp http.ResponseWriter,  r *http.Request)()  {
 	}
 	resp.Write([]byte(cookie.Value))
 
+}
+//注册一个能通过名称来获取的 session provider 管理器
+func RegisterProvider(name string, provider common.Provider) {
+	if provider == nil {
+		panic("session: Register provider is nil")
+	}
+
+	if _, p := providers[name]; p {
+		panic("session: Register provider is existed")
+	}
+
+	providers[name] = provider
 }
 
 

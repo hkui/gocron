@@ -11,14 +11,20 @@ import (
 	"sync"
 	"time"
 )
-var G_session *Manager
-
+var (
+	G_session *Manager
+)
 
 type Manager struct {
 	cookieName string //cookie的名称
 	lock sync.Mutex //锁，保证并发时数据的安全一致
 	provider common.Provider //管理session
 	maxLifeTime int64 //超时时间
+}
+//在启动函数中开启GC
+func init() {
+	G_session, _ = NewManager("memory", "sessionid", 3600)
+	go G_session.SessionGC()
 }
 func (manager *Manager) sessionId() string {
 	b := make([]byte, 32)
@@ -28,7 +34,7 @@ func (manager *Manager) sessionId() string {
 	return base64.URLEncoding.EncodeToString(b)
 }
 //根据当前请求的cookie中判断是否存在有效的session, 不存在则创建
-func (manager *Manager) SessionStart(w http.ResponseWriter, r *http.Request) (session Session) {
+func (manager *Manager) SessionStart(w http.ResponseWriter, r *http.Request) (session common.Session) {
 	//为该方法加锁
 	manager.lock.Lock()
 	defer manager.lock.Unlock()
@@ -54,6 +60,7 @@ func (manager *Manager) SessionStart(w http.ResponseWriter, r *http.Request) (se
 
 func NewManager(providerName, cookieName string, maxLifetime int64) (*Manager, error){
 	provider, ok := providers[providerName]
+
 	if !ok {
 		return nil, fmt.Errorf("session: unknown provide %q (forgotten import?)", providerName)
 	}
@@ -86,13 +93,13 @@ func (manager *Manager) SessionDestroy(w http.ResponseWriter, r *http.Request) {
 }
 //记录该session被访问的次数
 func count(w http.ResponseWriter, r *http.Request) {
-	sess := globalSession.SessionStart(w, r) //获取session实例
+	sess := G_session.SessionStart(w, r) //获取session实例
 	createTime := sess.Get("createTime") //获得该session的创建时间
 	if createTime == nil {
 		sess.Set("createTime", time.Now().Unix())
 	} else if (createTime.(int64) + 360) < (time.Now().Unix()) { //已过期
 		//注销旧的session信息，并新建一个session  globalSession.SessionDestroy(w, r)
-		sess = globalSession.SessionStart(w, r)
+		sess = G_session.SessionStart(w, r)
 	}
 	count := sess.Get("countnum")
 	if count == nil {
@@ -101,11 +108,7 @@ func count(w http.ResponseWriter, r *http.Request) {
 		sess.Set("countnum", count.(int) + 1)
 	}
 }
-//在启动函数中开启GC
-func Init() {
-	G_session, _ = NewManager("memory", "sessionid", 3600)
-	go G_session.SessionGC()
-}
+
 
 func (manager *Manager) SessionGC() {
 	manager.lock.Lock()
