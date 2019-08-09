@@ -1,13 +1,23 @@
 package main
 
 import (
+	"base/login/session"
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
+	"net/url"
+	"sync"
 	"time"
 )
 
+
+
+
 func main() {
+	session.Init()
 	var(
 		mux *http.ServeMux
 		listener net.Listener
@@ -31,15 +41,14 @@ func main() {
 	}
 
 }
-func login(resp http.ResponseWriter,  r *http.Request)  {
-	expiration := time.Now()
-	expiration = expiration.AddDate(1, 0, 0)
-	cookie := http.Cookie{Name: "username", Value: "hkui", Expires: expiration}
-	http.SetCookie(resp, &cookie)
-
-
-
-	resp.Write(([]byte)("123"));
+func login(w http.ResponseWriter,  r *http.Request)  {
+	sess := G_session.SessionStart(w, r)
+	r.ParseForm()
+	name := sess.Get("username")
+	if name != nil {
+		sess.Set("username", r.Form["username"]) //将表单提交的username值设置到session中
+	}
+	w.Write(([]byte)("123"));
 }
 
 func get(resp http.ResponseWriter,  r *http.Request)()  {
@@ -60,6 +69,7 @@ func get(resp http.ResponseWriter,  r *http.Request)()  {
 	}
 	resp.Write([]byte(cookie.Value))
 
-
-
 }
+
+
+
