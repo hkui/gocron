@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 
     <!-- bootstrap & fontawesome -->
+    <link rel="stylesheet" href="/css/login.css"/>
     <link rel="stylesheet" href="assets/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="assets/font-awesome/4.5.0/css/font-awesome.min.css"/>
 
@@ -51,7 +52,7 @@
                                         <fieldset>
                                             <label class="block clearfix">
                                                     <span class="block input-icon input-icon-right">
-                                                        <input type="text" class="form-control" name="uname"
+                                                        <input type="text" class="form-control" name="username"
                                                                placeholder="Username"/>
                                                         <i class="ace-icon fa fa-user"></i>
                                                     </span>
@@ -59,15 +60,22 @@
 
                                             <label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="password" class="form-control" name="pwd"
+															<input type="password" class="form-control" name="password"
                                                                    placeholder="Password"/>
 															<i class="ace-icon fa fa-lock"></i>
 														</span>
                                             </label>
+                                            <label class="block clearfix">
+                                                <img src="" id="code" title="refresh">
+                                                <input type="text" style="margin-top: 10px" name="code"
+                                                       placeholder="验证码">
+                                                <input type="hidden" name="captchaId">
+
+                                            </label>
 
 
                                             <div class="clearfix">
-                                                <button type="button"
+                                                <button type="button" id="login"
                                                         class="width-35 pull-right btn btn-sm btn-primary">
                                                     <i class="ace-icon fa fa-key"></i>
                                                     <span class="bigger-110">Login</span>
@@ -91,7 +99,72 @@
 </div>
 <!-- /.main-container -->
 
+<script type="text/javascript">
+    $(function () {
+        function loadCode() {
+            $.ajax({
+                url: '/captchaId/',
+                dataType: 'json',
+                success: function (res) {
+                    if (res.errno == 0) {
+                        var id = res.data.id;
+                        var img = '/captcha/' + id + '.png';
+                        $('#code').attr('src', img)
+                        $('input[name="captchaId"]').val(id)
+                    } else {
+                        console.log(res)
+                    }
 
+                }
+            })
+        }
+        loadCode()
+
+        $('#code').click(function () {
+            var src = $(this).attr('src')
+            var p = src.indexOf('?');
+            if (p >= 0) {
+                src = src.substr(0, p);
+            }
+            src = src + "?" + "reload=" + (new Date()).getTime();
+            $(this).attr('src', src)
+        })
+        $('#login').click(function () {
+            var id = $('input[name="captchaId"]').val()
+            var code = $('input[name="code"]').val()
+            var username = $('input[name="username"]').val()
+            var password = $('input[name="password"]').val()
+
+            if (username.length < 1 || password.length < 1) {
+                alert("用户名密码")
+                return false;
+            }
+
+            if (code.length < 1) {
+                alert("请输入验证码")
+                return false;
+            }
+            $.ajax({
+                url: '/login',
+                type: 'POST',
+                dataType: 'json',
+                data: {id: id, code: code, username: username, password: password},
+                success: function (res) {
+                    if (res.errno == 0) {
+                        window.location.href = "/"
+                    } else {
+                        loadCode()
+                        alert(res.msg)
+                    }
+                    console.log(res)
+                },
+
+            })
+        })
+
+
+    })
+</script>
 
 
 </body>

@@ -5,12 +5,12 @@ import (
 	"github.com/gorilla/sessions"
 	"net"
 	"net/http"
-
+	"time"
 )
 
 
-var store = sessions.NewFilesystemStore("./",[]byte("session_file"))
-//var store=sessions.NewCookieStore([]byte("session_cookie"))
+//var store = sessions.NewFilesystemStore("./",[]byte("session_file"))
+var store=sessions.NewCookieStore([]byte("session_cookie"))
 
 const sess_name  = "user"
 
@@ -72,6 +72,7 @@ func set(w http.ResponseWriter,  r *http.Request)  {
 	}else{
 		fmt.Printf("set %s=%s \n",key,value)
 	}
+	w.Write([]byte(time.Now().Format("2006 15:04:05.000")))
 }
 
 func get(w http.ResponseWriter,  r *http.Request)()  {
@@ -91,13 +92,15 @@ func get(w http.ResponseWriter,  r *http.Request)()  {
 		fmt.Println(err)
 		return
 	}
+	ses.Options.MaxAge=20
 
 
 	for k,v:=range ses.Values{
 		out+=fmt.Sprintf("%s=%s\n",k,v)
 	}
-	fmt.Println(out)
+	ses.Save(r,w)
 	w.Write([]byte(out))
+	w.Write([]byte(time.Now().Format("2006 15:04:05.000")))
 
 
 
