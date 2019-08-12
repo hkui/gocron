@@ -7,6 +7,7 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <script src="/js/bootstrap.bundle.js"></script>
     <script src="/js/layer/layer.js"></script>
+    <script src="/js/common.js"></script>
 </head>
 <style>
     #check {
@@ -83,10 +84,12 @@
             dataType: 'json',
             data: 'job=' + encodeURIComponent(JSON.stringify(postData)),
             success: function (res) {
-                layer.msg(res.msg, {icon: 1});
                 setTimeout(function () {
                     if (res.errno == 0) {
+                        layer.msg(res.msg, {icon: 1});
                         window.location.href = "/"
+                    }else{
+                        layer.msg(res.msg, {icon: 1});
                     }
                 }, 1500)
 
@@ -134,6 +137,7 @@
                         $("input[name='" + k + "']").val(data[k])
                     }
                 } else {
+                    alert(res.msg)
                     console.log(res)
                 }
 

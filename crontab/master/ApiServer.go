@@ -137,7 +137,7 @@ func handleLogin(resp http.ResponseWriter, req *http.Request) {
 	password = req.PostForm.Get("password")
 
 	if !captcha.VerifyString(id, code) {
-		errno = -1
+		errno = common.CODE_FAIL
 		msg = "验证码错误"
 
 	} else {
@@ -147,7 +147,7 @@ func handleLogin(resp http.ResponseWriter, req *http.Request) {
 			msg = "登录成功"
 
 		} else {
-			errno = -1
+			errno = common.CODE_FAIL
 			msg = "用户名或密码错误"
 		}
 
@@ -183,7 +183,19 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 		job     common.Job
 		oldJob  *common.Job
 		bytes   []byte
+		login   bool
 	)
+	if login, err = checkLogin(resp, req); err != nil {
+		goto ERR
+	}
+
+	if !login {
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		if _, err = resp.Write(bytes); err != nil {
+			goto ERR
+		}
+		return
+	}
 	//保存任务到etcd
 	if err = req.ParseForm(); err != nil {
 		goto ERR
@@ -195,7 +207,8 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 		goto ERR
 	}
 	if len(job.Name) < 1 || len(job.Command) < 1 || len(job.CronExpr) < 1 {
-		if bytes, err = common.BuildResponse(-1, "参数缺失", nil); err == nil {
+
+		if bytes, err = common.BuildResponse(common.CODE_PARAM_LOST, "参数缺失", nil); err == nil {
 			resp.Write(bytes)
 		}
 		return
@@ -206,13 +219,13 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	//返回正常应答{"errno":0,"msg":"","data":{}}
-	if bytes, err = common.BuildResponse(0, "success", &oldJob); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", &oldJob); err == nil {
 		resp.Write(bytes)
 	}
 	return
 
 ERR:
-	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_FAIL, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	}
 }
@@ -224,7 +237,19 @@ func handleJobDelte(resp http.ResponseWriter, req *http.Request) {
 		name   string
 		oldJob *common.Job
 		bytes  []byte
+		login  bool
 	)
+	if login, err = checkLogin(resp, req); err != nil {
+		goto ERR
+	}
+
+	if !login {
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		if _, err = resp.Write(bytes); err != nil {
+			goto ERR
+		}
+		return
+	}
 	if err = req.ParseForm(); err != nil {
 		goto ERR
 	}
@@ -233,7 +258,7 @@ func handleJobDelte(resp http.ResponseWriter, req *http.Request) {
 	if oldJob, err = G_jobMgr.DeleteJob(name); err != nil {
 		goto ERR
 	}
-	if bytes, err = common.BuildResponse(0, "success", &oldJob); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", &oldJob); err == nil {
 		resp.Write(bytes)
 	} else {
 		log.Println(err)
@@ -241,7 +266,7 @@ func handleJobDelte(resp http.ResponseWriter, req *http.Request) {
 	return
 
 ERR:
-	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_FAIL, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	} else {
 		log.Println(err)
@@ -263,15 +288,13 @@ func handleJobList(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	if !login {
-		if bytes, err = common.BuildResponse(-1, "未登录", ""); err != nil {
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
-		} else {
-			if _, err = resp.Write(bytes); err != nil {
-				goto ERR
-			}
 		}
 		return
 	}
+
 	if err = req.ParseForm(); err != nil {
 		goto ERR
 	}
@@ -289,7 +312,7 @@ func handleJobList(resp http.ResponseWriter, req *http.Request) {
 	if jobListsRes, err = G_jobMgr.JobList(page, limit); err != nil {
 		goto ERR
 	}
-	if bytes, err = common.BuildResponse(0, "success", jobListsRes); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", jobListsRes); err == nil {
 		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
 		}
@@ -306,7 +329,19 @@ func handleJobKill(resp http.ResponseWriter, req *http.Request) {
 		err   error
 		name  string
 		bytes []byte
+		login bool
 	)
+	if login, err = checkLogin(resp, req); err != nil {
+		goto ERR
+	}
+
+	if !login {
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		if _, err = resp.Write(bytes); err != nil {
+			goto ERR
+		}
+		return
+	}
 	if err = req.ParseForm(); err != nil {
 		goto ERR
 	}
@@ -314,7 +349,7 @@ func handleJobKill(resp http.ResponseWriter, req *http.Request) {
 	if err = G_jobMgr.KillJob(name); err != nil {
 		goto ERR
 	}
-	if bytes, err = common.BuildResponse(0, "success", nil); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", nil); err == nil {
 		if _, err = resp.Write(bytes); err != nil {
 			log.Println(err)
 		}
@@ -323,7 +358,7 @@ func handleJobKill(resp http.ResponseWriter, req *http.Request) {
 	}
 	return
 ERR:
-	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_FAIL, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	} else {
 		log.Println(err)
@@ -335,15 +370,28 @@ func handleJobOne(resp http.ResponseWriter, req *http.Request) {
 		name  string
 		bytes []byte
 		job   *common.Job
+		login bool
 	)
+	if login, err = checkLogin(resp, req); err != nil {
+		goto ERR
+	}
+
+	if !login {
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		if _, err = resp.Write(bytes); err != nil {
+			goto ERR
+		}
+		return
+	}
 	if err = req.ParseForm(); err != nil {
 		goto ERR
 	}
+
 	name = req.Form.Get("name")
 	if job, err = G_jobMgr.JobOne(name); err != nil {
 		goto ERR
 	}
-	if bytes, err = common.BuildResponse(0, "success", job); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", job); err == nil {
 		if _, err = resp.Write(bytes); err != nil {
 			log.Println(err)
 		}
@@ -352,7 +400,7 @@ func handleJobOne(resp http.ResponseWriter, req *http.Request) {
 	}
 	return
 ERR:
-	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_FAIL, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	} else {
 		log.Println(err)
@@ -372,7 +420,7 @@ func handleCheckJobCronExpr(resp http.ResponseWriter, req *http.Request) {
 	if nexts, err = G_jobMgr.CheckCronExpr(cronExpr); err != nil {
 		goto ERR
 	}
-	if bytes, err = common.BuildResponse(0, "success", nexts); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", nexts); err == nil {
 		if _, err = resp.Write(bytes); err != nil {
 			log.Println(err)
 		}
@@ -381,7 +429,7 @@ func handleCheckJobCronExpr(resp http.ResponseWriter, req *http.Request) {
 	}
 	return
 ERR:
-	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_FAIL, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	} else {
 		log.Println(err)
@@ -400,7 +448,19 @@ func handleJobLog(resp http.ResponseWriter, req *http.Request) {
 		limit      int
 		logArr     []*common.JobLogShow
 		bytes      []byte
+		login      bool
 	)
+	if login, err = checkLogin(resp, req); err != nil {
+		goto ERR
+	}
+
+	if !login {
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		if _, err = resp.Write(bytes); err != nil {
+			goto ERR
+		}
+		return
+	}
 
 	// 解析GET参数
 	if err = req.ParseForm(); err != nil {
@@ -423,13 +483,13 @@ func handleJobLog(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	// 正常应答
-	if bytes, err = common.BuildResponse(0, "success", logArr); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", logArr); err == nil {
 		resp.Write(bytes)
 	}
 	return
 
 ERR:
-	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_FAIL, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	}
 }
@@ -439,12 +499,24 @@ func handleWorkerList(resp http.ResponseWriter, req *http.Request) {
 		err     error
 		bytes   []byte
 		workers []string
+		login   bool
 	)
+	if login, err = checkLogin(resp, req); err != nil {
+		goto ERR
+	}
+
+	if !login {
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		if _, err = resp.Write(bytes); err != nil {
+			goto ERR
+		}
+		return
+	}
 
 	if workers, err = G_workerMgr.ListWorkers(); err != nil {
 		goto ERR
 	}
-	if bytes, err = common.BuildResponse(0, "success", workers); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", workers); err == nil {
 		if _, err = resp.Write(bytes); err != nil {
 			log.Println(err)
 		}
@@ -453,7 +525,7 @@ func handleWorkerList(resp http.ResponseWriter, req *http.Request) {
 	}
 	return
 ERR:
-	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+	if bytes, err = common.BuildResponse(common.CODE_FAIL, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	} else {
 		log.Println(err)
@@ -462,6 +534,24 @@ ERR:
 
 //返回可选着的shell命令
 func handleShellList(resp http.ResponseWriter, req *http.Request) {
+	var (
+		err   error
+		login bool
+		bytes []byte
+	)
+	if login, err = checkLogin(resp, req); err != nil {
+		goto ERR
+	}
+
+	if !login {
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		if _, err = resp.Write(bytes); err != nil {
+			goto ERR
+		}
+		return
+	}
 	G_jobMgr.Shells()
+ERR:
+	http.Error(resp, err.Error(), http.StatusBadRequest)
 
 }

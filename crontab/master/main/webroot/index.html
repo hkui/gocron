@@ -7,6 +7,7 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <script src="/js/bootstrap.bundle.js"></script>
     <script src="/js/layer/layer.js"></script>
+    <script src="/js/common.js"></script>
     <link href="https://cdn.bootcss.com/font-awesome/5.10.0-12/css/all.min.css" rel="stylesheet">
     <style>
         .pagePrev, .pageNext {
@@ -155,8 +156,7 @@
                         $('#job-list').html('')
                         $('.pageNext').hide()
                         $('.pagePrev').hide()
-                        console.log(res)
-                        alert(res.msg)
+                        layer.msg(res.msg, {icon: 1});
                     }
                 }
             })
@@ -185,6 +185,7 @@
                         if (res.errno == 0) {
                             tr.remove();
                         }
+
                     }
 
                 })
@@ -206,6 +207,8 @@
                 dataType: "json",
                 success: function (res) {
                     layer.msg(res.msg, {icon: 1});
+
+
                 }
 
             })
@@ -251,7 +254,7 @@
                             content: html
                         });
                     } else {
-                        alert(res.msg)
+                        layer.msg(res.msg, {icon: 1});
                     }
                 }
             })

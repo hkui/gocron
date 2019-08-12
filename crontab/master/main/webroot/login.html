@@ -18,6 +18,9 @@
     <link rel="stylesheet" href="assets/css/ace.min.css"/>
 
     <script src="assets/js/jquery-2.1.4.min.js"></script>
+    <script src="/js/layer/layer.js"></script>
+    <script src="/js/common.js"></script>
+
 
 </head>
 
@@ -136,12 +139,12 @@
             var password = $('input[name="password"]').val()
 
             if (username.length < 1 || password.length < 1) {
-                alert("用户名密码")
+                layer.msg("请填写用户名密码", {icon: 4});
                 return false;
             }
 
             if (code.length < 1) {
-                alert("请输入验证码")
+                layer.msg("请输入验证码", {icon: 4});
                 return false;
             }
             $.ajax({
@@ -154,9 +157,8 @@
                         window.location.href = "/"
                     } else {
                         loadCode()
-                        alert(res.msg)
                     }
-                    console.log(res)
+                    layer.msg(res.msg, {icon: 1});
                 },
 
             })
