@@ -535,9 +535,10 @@ ERR:
 //返回可选着的shell命令
 func handleShellList(resp http.ResponseWriter, req *http.Request) {
 	var (
-		err   error
-		login bool
-		bytes []byte
+		err    error
+		login  bool
+		bytes  []byte
+		output []string
 	)
 	if login, err = checkLogin(resp, req); err != nil {
 		goto ERR
@@ -550,7 +551,16 @@ func handleShellList(resp http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
-	G_jobMgr.Shells()
+	if output, err = G_jobMgr.Shells(); err != nil {
+		goto ERR
+	}
+	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", output); err != nil {
+		goto ERR
+	}
+	if _, err = resp.Write(bytes); err != nil {
+		goto ERR
+	}
+	return
 ERR:
 	http.Error(resp, err.Error(), http.StatusBadRequest)
 

@@ -24,10 +24,14 @@ func main() {
 		return
 	}
 	stringout=string(output)
+	stringout=strings.Trim(stringout,"\n")
 
-	//fmt.Println(stringout)
+	fmt.Println(stringout)
+
 	stringArr=strings.Split(stringout,"\n")
-	fmt.Println(stringArr,len(stringArr))
+	for k,v:=range stringArr{
+		fmt.Println(k,v)
+	}
 
 
 }

@@ -8,6 +8,7 @@ import (
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"math"
 	"os/exec"
+	"strings"
 )
 type JobMgr struct {
 	client *clientv3.Client
@@ -185,19 +186,21 @@ func (jobNgr *JobMgr)CheckCronExpr(cronExpr string)(nexts []string,err error)  {
 }
 
 
-func (JobMgr *JobMgr)Shells()(outputs []string ,err error){
+func (JobMgr *JobMgr)Shells()(stringArr []string ,err error){
 	var (
 		cmd *exec.Cmd
 		output []byte
+		stringout string
 
 	)
-	//cmd=exec.Command("/bin/bash","-c","ls -al /")
-	cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c","php /code/yii/yii")
-	outputs=make([]string,0)
+	cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c","php /code/yii/yii|grep -E '[a-z-]+/[a-z-]+'|awk '{print $1}'")
 
-	if output,err=cmd.CombinedOutput();err==nil{
-		println(output)
+	if output,err=cmd.CombinedOutput();err!=nil{
+		return
 	}
+	stringout=string(output)
+	stringout=strings.Trim(stringout,"\n")
+	stringArr=strings.Split(stringout,"\n")
 
 	return
 }

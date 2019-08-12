@@ -45,9 +45,11 @@ func main() {
 	if err = master.InitApiServer(); err != nil {
 		goto ERR
 	}
+	fmt.Println("Server listen on ",master.G_config.ApiPort)
 	for {
 		time.Sleep(1 * time.Second)
 	}
+
 	return
 
 ERR:

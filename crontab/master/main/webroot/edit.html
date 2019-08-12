@@ -10,50 +10,63 @@
     <script src="/js/common.js"></script>
 </head>
 <style>
-    #check {
-        width: 20%;
-        border: 1px solid darkblue;
-        border-radius: 1px;
-        display: none;
-    }
-
-    #check ul {
-        list-style: none;
-        margin: 5px 5px 0 0;
-        width: 100%;
-    }
-
-    #check ul li {
-        border-bottom: 1px darkblue dotted;
-        width: 100%;
-    }
-    #check h5{
+    #submit{margin-top: 20px;}
+   #check{
+       margin: 10px 0 0 0;
+       border: solid 1px darkgoldenrod;
+       border-top: none;
+       border-radius: 2px;
+       font-size: 14px;
+       display: none;
+       float: right;
+   }
+    #check tr{
         text-align: center;
+        margin-top: 5px;
     }
+    #check thead{
+        background: #0f6674;
+        color: white;
+    }
+    #check tr td {
+        border: 1px none goldenrod;
+        border-top-style: solid;
+    }
+    tbody tr:nth-child(0) td{
+        border-top: none;
+    }
+
 </style>
 <body>
 <div class="container-fluid">
-    <form>
+    <form style="width: 60%" class="inline">
         <div class="form-group">
             <label for="exampleInputEmail1">任务名称</label>
             <input type="text" class="form-control" name="name">
+
         </div>
         <div class="form-group">
             <label for="exampleInputPassword1">shell命令</label>
-            <input type="text" class="form-control" name="command">
+            <select name="command" class="form-control inline" >
+            </select>
         </div>
         <div class="form-group">
             <label for="exampleInputPassword1">cron表达式</label>
-            <input type="text" class="form-control" name="cronExpr">
-        </div>
-        <div class="form-group" id="check">
-            <h5>预计下次执行时间</h5>
-            <ul></ul>
+            <div>
+                <input type="text" class="form-control" name="cronExpr" style="float: left">
+                <table id="check" >
+                <thead >
+                    <tr><th>执行计划</th></tr>
+                </thead>
+                <tbody id="plan"></tbody>
+            </table>
+            </div>
+
 
         </div>
-
         <button type="submit" class="btn btn-primary" id="submit">提交</button>
     </form>
+
 </div>
 <script type="text/javascript">
     function getQueryVariable(variable) {
@@ -66,6 +79,24 @@
             }
         }
         return (false);
+    }
+    function getCommands(){
+             $.ajax({
+            url: '/job/shells',
+            dataType: 'json',
+            success: function (res) {
+                if (res.errno == 0) {
+                    var data=res.data;
+                    var optionhtml='';
+                    for (var i in data){
+                        optionhtml+="<option value='"+data[i]+"'>"+data[i]+"</option >";
+                    }
+                    $("select[name='command']").html(optionhtml)
+
+                }
+
+            }
+        })
     }
 
     $('#submit').click(function (e) {
@@ -108,23 +139,26 @@
             success: function (res) {
                 if (res.errno == 0) {
                     var data=res.data;
-                    var lihtml='';
+                    var trhtml='';
                     for (var i in data){
-                        lihtml+="<li>"+data[i]+"</li>";
+                        trhtml+="<tr><td>"+data[i]+"</td></tr>";
                     }
-                    $('#check ul').html(lihtml)
-                    $('#check').show();
+                    $('#check').show()
+                    $('#plan').html(trhtml)
 
                 } else {
                     layer.msg(res.msg, {icon: 2});
-                    $('#check ul').html('')
-                    $('#check').hidden();
+                    $('#plan').html('')
+
+                    $('#check').hide()
+
                 }
 
             }
         })
     })
     $(function () {
+        getCommands()
         var job_name = getQueryVariable('job_name')
         if (!job_name) return;
         $.ajax({
@@ -145,6 +179,7 @@
         })
 
     })
+
 
 
 </script>
