@@ -193,7 +193,7 @@ func (JobMgr *JobMgr)Shells()(stringArr []string ,err error){
 		stringout string
 
 	)
-	cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c","php /code/yii/yii|grep -E '[a-z-]+/[a-z-]+'|awk '{print $1}'")
+	cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c",G_config.ShellCommand)
 
 	if output,err=cmd.CombinedOutput();err!=nil{
 		return

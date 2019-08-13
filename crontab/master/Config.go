@@ -14,6 +14,7 @@ type Config struct {
 	Webroot string `json:"webroot"`
 	MongodbUri []string  `json:"mongodbUri"`
 	MongodbConnectTimeout int64 `json:"mongodbConnectTimeout"`
+	ShellCommand string `json:"shellCommand"`
 }
 var (
 	G_config *Config

@@ -22,5 +22,8 @@
 
 
   "mongodb连接超时":"单位毫秒",
-  "mongodbConnectTimeout": 5000
+  "mongodbConnectTimeout": 5000,
+
+  "能执行的shell由下面的命令获取":"",
+  "shellCommand": "php /code/yii/yii|grep -E '[a-z-]+/[a-z-]+'|awk '{print $1}'"
 }

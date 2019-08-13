@@ -35,11 +35,29 @@
     tbody tr:nth-child(0) td{
         border-top: none;
     }
+    .help_command{
+        margin-top: 10px;
+        display: inline-block;
+        background: darkgreen;
+        cursor: pointer;
+        color:white;
+        width: 20px;
+        text-align: center;
+        border: 2px darkgreen solid;
+        border-radius: 2px;
+    }
+    #ul_command{
+        list-style: none;
+        font-size: 14px;
+    }
+    #ul_command li{
+        border-bottom: 1px gainsboro solid;
+    }
 
 </style>
 <body>
 <div class="container-fluid">
-    <form style="width: 60%" class="inline">
+    <form style="width: 50%" class="inline">
         <div class="form-group">
             <label for="exampleInputEmail1">任务名称</label>
             <input type="text" class="form-control" name="name">
@@ -47,9 +65,10 @@
         </div>
         <div class="form-group">
             <label for="exampleInputPassword1">shell命令</label>
-            <select name="command" class="form-control inline" >
-            </select>
+            <input type="text" class="form-control inline" name="command">
+            <span class="help_command" title="查看规则">?</span>
         </div>
+
         <div class="form-group">
             <label for="exampleInputPassword1">cron表达式</label>
             <div>
@@ -61,7 +80,6 @@
                 <tbody id="plan"></tbody>
             </table>
             </div>
-
 
         </div>
         <button type="submit" class="btn btn-primary" id="submit">提交</button>
@@ -80,23 +98,9 @@
         }
         return (false);
     }
-    function getCommands(){
-             $.ajax({
-            url: '/job/shells',
-            dataType: 'json',
-            success: function (res) {
-                if (res.errno == 0) {
-                    var data=res.data;
-                    var optionhtml='';
-                    for (var i in data){
-                        optionhtml+="<option value='"+data[i]+"'>"+data[i]+"</option >";
-                    }
-                    $("select[name='command']").html(optionhtml)
 
-                }
+    function getCommands() {
 
-            }
-        })
     }
 
     $('#submit').click(function (e) {
@@ -157,8 +161,35 @@
             }
         })
     })
+    $('.help_command').click(function(){
+        var html="<ul id='ul_command'>";
+        $.ajax({
+            url: '/job/shells',
+            dataType: 'json',
+            success: function (res) {
+                if (res.errno == 0) {
+                    var data = res.data;
+                    for (var i in data) {
+                        html += "<li>" + data[i] + "</li >";
+                    }
+
+                    html+="</ul>"
+                    layer.open({
+                        type: 1,
+                        title:'支持的命令',
+                        area: ['auto', '70%'], //宽高
+                        content: html
+                    });
+
+
+                }
+
+            }
+        })
+
+
+    })
     $(function () {
-        getCommands()
         var job_name = getQueryVariable('job_name')
         if (!job_name) return;
         $.ajax({
@@ -171,7 +202,7 @@
                         $("input[name='" + k + "']").val(data[k])
                     }
                 } else {
-                    alert(res.msg)
+                    layer.alert(res.msg)
                     console.log(res)
                 }
 
