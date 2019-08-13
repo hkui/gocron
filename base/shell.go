@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
-	"strings"
 )
 
 func main() {
@@ -13,25 +12,20 @@ func main() {
 		cmd *exec.Cmd
 		output []byte
 		err error
-		stringout string
-		stringArr []string
+		shell string
 	)
-	//cmd=exec.Command("/bin/bash","-c","ls -al /")
-	cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c","php /code/yii/yii|grep -E '[a-z-]+/[a-z-]+'|awk '{print $1}'")
+
+
+	shell="php /www/lepu_master/yii"
+	cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c",shell)
 
 	if output,err=cmd.CombinedOutput();err!=nil{
 		fmt.Println(err)
 		return
 	}
-	stringout=string(output)
-	stringout=strings.Trim(stringout,"\n")
+	fmt.Printf("%s\n",output)
 
-	fmt.Println(stringout)
 
-	stringArr=strings.Split(stringout,"\n")
-	for k,v:=range stringArr{
-		fmt.Println(k,v)
-	}
 
 
 }
