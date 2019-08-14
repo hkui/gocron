@@ -15,7 +15,6 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 		return
-
 	}
 
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8") //设置Content-Type

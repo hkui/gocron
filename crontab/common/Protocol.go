@@ -92,6 +92,11 @@ type JobLogShow struct {
 	StartTime string  `json:"startTime" bson:"startTime"`
 	EndTime string   `json:"endTime" bson:"endTime"`
 }
+type LoginRes struct {
+	Data interface{} `json:"data"`
+	Status int `json:"status"`
+	Note string `json:"note"`
+}
 
 func TimeToStr(time2 time.Time)(tstring string)  {
 	tstring=time2.Format("06/01/02 15:04:05.000")

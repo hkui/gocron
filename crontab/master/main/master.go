@@ -41,6 +41,11 @@ func main() {
 	if err=master.InitUserMgr();err!=nil{
 		goto ERR
 	}
+	master.G_userMgr.LoginCheck("huangkui@lepu.cn","1hb6sqt@lepu")
+	return
+
+
+
 	//启动Api HTTP服务
 	if err = master.InitApiServer(); err != nil {
 		goto ERR
