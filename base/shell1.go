@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"syscall"
+	//"syscall"
 )
 
 func main() {
@@ -15,12 +15,12 @@ func main() {
 		shell string
 	)
 
-	shell = " php /code/yii/yii"
+	shell = " php /www/lepu_master/yii"
 
 	cmd = exec.Command("/bin/bash", "-c", shell)
-	cmd.SysProcAttr = &syscall.SysProcAttr{
+	/*cmd.SysProcAttr = &syscall.SysProcAttr{
 		Ctty: int(os.Stdout.Fd()),
-	}
+	}*/
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
