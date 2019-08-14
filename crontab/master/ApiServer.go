@@ -45,6 +45,7 @@ func InitApiServer() (err error) {
 	mux.HandleFunc("/job/checkexpcron", handleCheckJobCronExpr)
 	mux.HandleFunc("/job/shells", handleShellList)
 	mux.HandleFunc("/login", handleLogin)
+	mux.HandleFunc("/logout", handleLogout)
 
 	staticDir = http.Dir(G_config.Webroot)
 	staticHandler = http.FileServer(staticDir)
@@ -168,6 +169,31 @@ func handleLogin(resp http.ResponseWriter, req *http.Request) {
 	} else {
 		goto ERR
 	}
+	return
+
+ERR:
+	http.Error(resp, err.Error(), http.StatusBadRequest)
+}
+
+func handleLogout(resp http.ResponseWriter, req *http.Request) {
+	var (
+		err error
+
+		sess  *sessions.Session
+		bytes []byte
+	)
+	if sess, err = G_apiServer.store.Get(req, G_apiServer.sessid); err != nil {
+		goto ERR
+	}
+	delete(sess.Values, "user")
+	sess.Options.MaxAge = SESS_MAX_AGE
+	if err = sess.Save(req, resp); err != nil {
+		goto ERR
+	}
+
+	bytes, _ = common.BuildResponse(common.CODE_SUCCESS, "success", "")
+	resp.Write(bytes)
+
 	return
 
 ERR:

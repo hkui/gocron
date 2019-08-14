@@ -10,6 +10,7 @@
     <script src="/js/common.js"></script>
     <link href="https://cdn.bootcss.com/font-awesome/5.10.0-12/css/all.min.css" rel="stylesheet">
     <style>
+        body{font-size: 14px;}
         .pagePrev, .pageNext {
             display: none;
         }
@@ -28,9 +29,10 @@
     <div class="row">
         <div class="col-md-12">
             <div class="page-header">
-                <h2>管理后台
+                <h4>管理后台
                     <small>Golang分布式crontab</small>
-                </h2>
+                    <span style="cursor: pointer" id="logout">退出</span>
+                </h4>
             </div>
         </div>
     </div>
@@ -253,6 +255,19 @@
                             shadeClose: true, //开启遮罩关闭
                             content: html
                         });
+                    } else {
+                        layer.msg(res.msg, {icon: 1});
+                    }
+                }
+            })
+        })
+        $('#logout').click(function(){
+            $.ajax({
+                url: '/logout',
+                dataType: 'json',
+                success: function (res) {
+                    if (res.errno == 0) {
+                        window.location.reload()
                     } else {
                         layer.msg(res.msg, {icon: 1});
                     }
