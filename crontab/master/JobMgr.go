@@ -1,12 +1,14 @@
 package master
 
 import (
+	"bytes"
 	"context"
 	"crontab/common"
 	"encoding/json"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"math"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -189,16 +191,22 @@ func (jobNgr *JobMgr)CheckCronExpr(cronExpr string)(nexts []string,err error)  {
 func (JobMgr *JobMgr)Shells()(stringArr []string ,err error){
 	var (
 		cmd *exec.Cmd
-		output []byte
 		stringout string
+		out bytes.Buffer
 
 	)
 	cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c",G_config.ShellCommand)
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = &out
 
-	if output,err=cmd.CombinedOutput();err!=nil{
+ 	err = cmd.Run()
+
+	if err!=nil{
 		return
 	}
-	stringout=string(output)
+
+	stringout=out.String()
 	stringout=strings.Trim(stringout,"\n")
 	stringArr=strings.Split(stringout,"\n")
 

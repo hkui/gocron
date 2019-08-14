@@ -25,5 +25,5 @@
   "mongodbConnectTimeout": 5000,
 
   "能执行的shell由下面的命令获取":"",
-  "shellCommand": "php /code/yii/yii|grep -E '[a-z-]+/[a-z-]+'|awk '{print $1}'"
+  "shellCommand": "php /www/lepu_master/yii|grep -E '^\\s+[a-z-]+/[a-z-]+'|awk '{print $1}'"
 }

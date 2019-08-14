@@ -47,7 +47,6 @@
         border-radius: 2px;
     }
     #ul_command{
-        list-style: none;
         font-size: 14px;
     }
     #ul_command li{
@@ -162,7 +161,7 @@
         })
     })
     $('.help_command').click(function(){
-        var html="<ul id='ul_command'>";
+        var html="<ol id='ul_command'>";
         $.ajax({
             url: '/job/shells',
             dataType: 'json',
@@ -173,7 +172,7 @@
                         html += "<li>" + data[i] + "</li >";
                     }
 
-                    html+="</ul>"
+                    html+="</ol>"
                     layer.open({
                         type: 1,
                         title:'支持的命令',
