@@ -24,6 +24,10 @@
   "mongodb连接超时":"单位毫秒",
   "mongodbConnectTimeout": 5000,
 
+   "Yii Path": "Yii的路径",
+   "Yii": "php /www/lepu_master/yii",
+
   "能执行的shell由下面的命令获取":"",
   "shellCommand": "php /www/lepu_master/yii|grep -E '^\\s+[a-z-]+/[a-z-]+'|awk '{print $1}'"
+
 }

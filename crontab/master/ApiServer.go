@@ -210,6 +210,7 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 		oldJob  *common.Job
 		bytes   []byte
 		login   bool
+		isValid bool
 	)
 	if login, err = checkLogin(resp, req); err != nil {
 		goto ERR
@@ -239,6 +240,8 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
+	isValid,err=common.IsValidCommand(job.Name)
+
 	//保存到etcd
 	if oldJob, err = G_jobMgr.SaveJob(&job); err != nil {
 		goto ERR
