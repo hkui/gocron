@@ -1,9 +1,12 @@
 package common
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"github.com/gorhill/cronexpr"
+	"os"
+	"os/exec"
 	"runtime"
 	"strings"
 	"time"
@@ -212,5 +215,32 @@ type JobLogFilter struct {
 type SortLogByStartTime struct {
 	SortOrder int `bson:"startTime"`	// {startTime: -1}
 }
+//获取可执行的yii支持的shell
+func ValidShells(ShellCommand string)(stringArr []string ,err error){
+	var (
+		cmd *exec.Cmd
+		stringout string
+		out bytes.Buffer
+
+	)
+	cmd=exec.CommandContext(context.TODO(),"/bin/bash","-c",ShellCommand)
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = &out
+
+	err = cmd.Run()
+
+	if err!=nil{
+		return
+	}
+
+	stringout=out.String()
+	stringout=strings.Trim(stringout,"\n")
+	stringArr=strings.Split(stringout,"\n")
+
+	return
+}
+
+
 
 

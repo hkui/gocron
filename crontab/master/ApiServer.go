@@ -577,7 +577,8 @@ func handleShellList(resp http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
-	if output, err = G_jobMgr.Shells(); err != nil {
+
+	if output,err=common.ValidShells(G_config.ShellCommand); err != nil {
 		goto ERR
 	}
 	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", output); err != nil {
