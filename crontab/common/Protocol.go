@@ -3,7 +3,6 @@ package common
 import (
 	"bytes"
 	"context"
-	"crontab/master"
 	"encoding/json"
 	"github.com/gorhill/cronexpr"
 	"os"
@@ -241,12 +240,12 @@ func ValidShells(ShellCommand string)(stringArr []string ,err error){
 
 	return
 }
-func IsValidCommand(commandstr string)(bool,error)  {
+func IsValidCommand(commandstr string,ShellCommand string)(bool,error)  {
 	var (
 		stringArr []string
 		err error
 	)
-	if stringArr,err=ValidShells(master.G_config.ShellCommand);err!=nil{
+	if stringArr,err=ValidShells(ShellCommand);err!=nil{
 		return false,err
 	}
 	for _,v:=range  stringArr{

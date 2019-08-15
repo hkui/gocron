@@ -7,6 +7,7 @@ import (
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"math"
+	"strings"
 )
 type JobMgr struct {
 	client *clientv3.Client
@@ -90,7 +91,7 @@ func (JobMgr *JobMgr)JobList( page int64,limit int64 )(
 	var (
 		getResp *clientv3.GetResponse
 		kvPair *mvccpb.KeyValue
-		jobVersion common.JobListOne
+		jobOne common.JobListOne
 		jobList []common.JobListOne
 		end int64
 		start int64
@@ -111,9 +112,9 @@ func (JobMgr *JobMgr)JobList( page int64,limit int64 )(
 		return
 	}
 	for _,kvPair=range getResp.Kvs{
-		if err=json.Unmarshal(kvPair.Value,&jobVersion);err==nil{
-			jobVersion.ModRevision=kvPair.ModRevision
-			jobList=append(jobList,jobVersion)
+		if err=json.Unmarshal(kvPair.Value,&jobOne);err==nil{
+			jobOne.ModRevision=kvPair.ModRevision
+			jobList=append(jobList,jobOne)
 		}else{
 			err=nil
 		}
@@ -175,6 +176,7 @@ func (JobMgr *JobMgr)JobOne(name string)(jobOne *common.Job,err error)  {
 	if jobOne,err=common.UnpackJob(getResp.Kvs[0].Value);err!=nil{
 		return
 	}
+	jobOne.Command=strings.Trim(strings.Replace(jobOne.Command,G_config.Yii,"",-1)," ")
 	return
 }
 

@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -240,7 +241,16 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
-	isValid,err=common.IsValidCommand(job.Name)
+	if isValid,err=common.IsValidCommand(job.Command,strings.Trim(G_config.ShellCommand," "));err!=nil{
+		goto ERR
+	}
+	if !isValid{
+		bytes,_ = common.BuildResponse(common.CODE_COMMAND_INVALID, "命令非法", nil);
+		resp.Write(bytes)
+
+		return
+	}
+	job.Command=G_config.Yii+" "+job.Command
 
 	//保存到etcd
 	if oldJob, err = G_jobMgr.SaveJob(&job); err != nil {
