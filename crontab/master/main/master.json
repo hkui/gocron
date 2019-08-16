@@ -24,6 +24,9 @@
   "mongodb连接超时":"单位毫秒",
   "mongodbConnectTimeout": 5000,
 
+  "是否开启命令验证":"不开启的话，写入啥命令就是啥命令,否者从下面ShellCommand列表里获取",
+  "CommandCheck": true,
+
    "Yii Path": "Yii的路径",
    "Yii": " php /code/yii/yii",
 

@@ -7,7 +7,6 @@ import (
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"math"
-	"strings"
 )
 type JobMgr struct {
 	client *clientv3.Client
@@ -176,7 +175,6 @@ func (JobMgr *JobMgr)JobOne(name string)(jobOne *common.Job,err error)  {
 	if jobOne,err=common.UnpackJob(getResp.Kvs[0].Value);err!=nil{
 		return
 	}
-	jobOne.Command=strings.Trim(strings.Replace(jobOne.Command,G_config.Yii,"",-1)," ")
 	return
 }
 
@@ -184,3 +182,6 @@ func (jobNgr *JobMgr)CheckCronExpr(cronExpr string)(nexts []string,err error)  {
 	nexts,err=common.CheckCronExpr(cronExpr)
 	return
 }
+
+
+

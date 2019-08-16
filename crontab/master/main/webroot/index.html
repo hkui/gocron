@@ -55,9 +55,10 @@
                     <table class="table table-striped">
                         <thead>
                         <tr>
-                            <th>任务名称</th>
+                            <th>任务标识</th>
                             <th>shell命令</th>
                             <th>cron表达式</th>
+                            <th>说明</th>
                             <th>任务操作</th>
                         </tr>
                         </thead>
@@ -85,6 +86,7 @@
         <td class="job-name" attr_job_name="{job_name}">{job_name}</td>
         <td class="job-command">{job_command}</td>
         <td class="job-cronExpr">{job_cronExpr}</td>
+        <td class="job-cronExpr">{job_remark}</td>
         <td>
             <div class="btn-toolbar oper-btn">
                 <button class="btn btn-info edit-job"><i class="fa fa-edit"></i></button>
@@ -147,6 +149,7 @@
                                 trhtml += tpl.replace(/{job_name}/g, job['name'])
                                     .replace('{job_command}', job['command'])
                                     .replace('{job_cronExpr}', job['cronExpr'])
+                                    .replace('{job_remark}', job['remark'])
                             }
                             $('#job-list').html(trhtml)
                             $('.sum').html("总共" + data.sum + '条')

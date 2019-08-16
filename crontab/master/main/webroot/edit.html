@@ -58,7 +58,7 @@
 <div class="container-fluid">
     <form style="width: 50%" class="inline">
         <div class="form-group">
-            <label for="exampleInputEmail1">任务名称</label>
+            <label for="exampleInputEmail1">任务标识</label>
             <input type="text" class="form-control" name="name">
 
         </div>
@@ -66,6 +66,10 @@
             <label for="exampleInputPassword1">shell命令</label>
             <input type="text" class="form-control inline" name="command">
             <span class="help_command" title="查看规则">?</span>
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">任务说明</label>
+            <input type="text" class="form-control inline" name="remark">
         </div>
 
         <div class="form-group">
@@ -98,19 +102,18 @@
         return (false);
     }
 
-    function getCommands() {
-
-    }
 
     $('#submit').click(function (e) {
         e.preventDefault();
         var name = $("input[name='name']").val()
         var command = $("input[name='command']").val()
         var cronExpr = $("input[name='cronExpr']").val()
+        var remark = $("input[name='remark']").val()
         postData = {
             name: name,
             command: command,
-            cronExpr: cronExpr
+            cronExpr: cronExpr,
+            remark:remark
         }
         $.ajax({
             url: '/job/save',
@@ -200,6 +203,7 @@
                     for (var k in data) {
                         $("input[name='" + k + "']").val(data[k])
                     }
+                    $("input[name='name']").attr("readonly",true)
                 } else {
                     layer.alert(res.msg)
                     console.log(res)

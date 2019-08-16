@@ -18,6 +18,7 @@ type Job struct {
 	Name string `json:"name" bson:"name"`
 	Command string `json:"command"`
 	CronExpr string `json:"cronExpr"`
+	Remark string `json:"remark"`
 }
 type JobListOne struct {
 	Job
@@ -30,8 +31,6 @@ func (s JobList) Len() int { return len(s) }
 func (s JobList) Swap(i, j int){ s[i], s[j] = s[j], s[i] }
 
 func (s JobList) Less(i, j int) bool { return s[i].ModRevision > s[j].ModRevision }
-
-
 
 
 type JobListsRes struct {
@@ -255,9 +254,8 @@ func IsValidCommand(commandstr string,ShellCommand string)(bool,error)  {
 	}
 	return false,nil
 
-
-
 }
+
 
 
 

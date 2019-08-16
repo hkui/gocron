@@ -16,6 +16,7 @@ type Config struct {
 	MongodbConnectTimeout int64 `json:"mongodbConnectTimeout"`
 	ShellCommand string `json:"shellCommand"`
 	Yii string `json:"yii"`
+	CommandCheck bool `json:"commandCheck"`
 }
 var (
 	G_config *Config

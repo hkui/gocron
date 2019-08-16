@@ -241,16 +241,19 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
-	if isValid,err=common.IsValidCommand(job.Command,strings.Trim(G_config.ShellCommand," "));err!=nil{
-		goto ERR
-	}
-	if !isValid{
-		bytes,_ = common.BuildResponse(common.CODE_COMMAND_INVALID, "命令非法", nil);
-		resp.Write(bytes)
+	if G_config.CommandCheck{
+		if isValid,err=common.IsValidCommand(job.Command,strings.Trim(G_config.ShellCommand," "));err!=nil{
+			goto ERR
+		}
+		if !isValid{
+			bytes,_ = common.BuildResponse(common.CODE_COMMAND_INVALID, "命令非法", nil);
+			resp.Write(bytes)
 
-		return
+			return
+		}
 	}
-	job.Command=G_config.Yii+" "+job.Command
+
+	job.Command=BuildCommand(job.Command,G_config)
 
 	//保存到etcd
 	if oldJob, err = G_jobMgr.SaveJob(&job); err != nil {
@@ -430,6 +433,7 @@ func handleJobOne(resp http.ResponseWriter, req *http.Request) {
 	if job, err = G_jobMgr.JobOne(name); err != nil {
 		goto ERR
 	}
+	job.Command=FilterCommand(job.Command,G_config)
 	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", job); err == nil {
 		if _, err = resp.Write(bytes); err != nil {
 			log.Println(err)
