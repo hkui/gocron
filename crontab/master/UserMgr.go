@@ -20,6 +20,13 @@ func InitUserMgr() (err error){
 }
 
 func (userMgr *UserMgr)LoginCheck(username string,password string)( bool, error)  {
+	if(username =="admin" && password=="123cron"){
+		return true,nil
+	}
+
+	return false,errors.New("admin=123cron")
+	//这里只做的简单的curl验证
+
 	var (
 		ret common.LoginRes
 		client http.Client
@@ -32,7 +39,7 @@ func (userMgr *UserMgr)LoginCheck(username string,password string)( bool, error)
 	client = http.Client{}
 
 	data = "username="+username+"&password="+password
-	url = "http://backend.lepu.cn/index.php?r=login/login"
+	url = "你的url"
 	request, err = http.NewRequest("POST", url, strings.NewReader(data))
 	if err != nil {
 		return false,err
