@@ -13,7 +13,7 @@ var (
 
 func initArgs() {
 	// worker -config ./worker.json
-	flag.StringVar(&confFile, "config", "./worker.json", "指定worker.josn")
+	flag.StringVar(&confFile, "config", "./worker.json", "指定worker.json")
 	flag.Parse()
 }
 func main() {

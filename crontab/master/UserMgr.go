@@ -30,6 +30,7 @@ func (userMgr *UserMgr)LoginCheck(username string,password string)( bool, error)
 		body []byte
 	)
 	client = http.Client{}
+
 	data = "username="+username+"&password="+password
 	url = "http://backend.lepu.cn/index.php?r=login/login"
 	request, err = http.NewRequest("POST", url, strings.NewReader(data))

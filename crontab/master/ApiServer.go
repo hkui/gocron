@@ -594,9 +594,14 @@ func handleShellList(resp http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
+	if G_config.CommandCheck{
+		if output,err=common.ValidShells(G_config.ShellCommand); err != nil {
+			goto ERR
+		}
 
-	if output,err=common.ValidShells(G_config.ShellCommand); err != nil {
-		goto ERR
+	}else{
+		output=[]string{"所有的,没限制"}
+
 	}
 	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", output); err != nil {
 		goto ERR
@@ -604,6 +609,7 @@ func handleShellList(resp http.ResponseWriter, req *http.Request) {
 	if _, err = resp.Write(bytes); err != nil {
 		goto ERR
 	}
+
 	return
 ERR:
 	http.Error(resp, err.Error(), http.StatusBadRequest)
