@@ -2,9 +2,9 @@ package master
 
 import (
 	"context"
-	"crontab/common"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"gocron/crontab/common"
 	"time"
 )
 

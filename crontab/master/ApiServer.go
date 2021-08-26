@@ -1,10 +1,10 @@
 package master
 
 import (
-	"crontab/common"
 	"encoding/json"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/sessions"
+	"gocron/crontab/common"
 	"log"
 	"net"
 	"net/http"
@@ -88,7 +88,7 @@ func checkLogin(resp http.ResponseWriter, req *http.Request) (bool, error) {
 		return false, err
 	}
 	if len(sess.Values) < 1 || sess.Values["user"] == nil {
-		return false, nil;
+		return false, nil
 	}
 	return true, nil
 
@@ -218,7 +218,7 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	if !login {
-		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "")
 		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
 		}
@@ -241,19 +241,19 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
-	if G_config.CommandCheck{
-		if isValid,err=common.IsValidCommand(job.Command,strings.Trim(G_config.ShellCommand," "));err!=nil{
+	if G_config.CommandCheck {
+		if isValid, err = common.IsValidCommand(job.Command, strings.Trim(G_config.ShellCommand, " ")); err != nil {
 			goto ERR
 		}
-		if !isValid{
-			bytes,_ = common.BuildResponse(common.CODE_COMMAND_INVALID, "命令非法", nil);
+		if !isValid {
+			bytes, _ = common.BuildResponse(common.CODE_COMMAND_INVALID, "命令非法", nil)
 			resp.Write(bytes)
 
 			return
 		}
 	}
 
-	job.Command=BuildCommand(job.Command,G_config)
+	job.Command = BuildCommand(job.Command, G_config)
 
 	//保存到etcd
 	if oldJob, err = G_jobMgr.SaveJob(&job); err != nil {
@@ -286,7 +286,7 @@ func handleJobDelte(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	if !login {
-		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "")
 		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
 		}
@@ -330,7 +330,7 @@ func handleJobList(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	if !login {
-		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "")
 		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
 		}
@@ -378,7 +378,7 @@ func handleJobKill(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	if !login {
-		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "")
 		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
 		}
@@ -419,7 +419,7 @@ func handleJobOne(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	if !login {
-		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "")
 		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
 		}
@@ -433,7 +433,7 @@ func handleJobOne(resp http.ResponseWriter, req *http.Request) {
 	if job, err = G_jobMgr.JobOne(name); err != nil {
 		goto ERR
 	}
-	job.Command=FilterCommand(job.Command,G_config)
+	job.Command = FilterCommand(job.Command, G_config)
 	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", job); err == nil {
 		if _, err = resp.Write(bytes); err != nil {
 			log.Println(err)
@@ -498,7 +498,7 @@ func handleJobLog(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	if !login {
-		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "")
 		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
 		}
@@ -549,7 +549,7 @@ func handleWorkerList(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	if !login {
-		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "")
 		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
 		}
@@ -588,19 +588,19 @@ func handleShellList(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	if !login {
-		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "");
+		bytes, _ = common.BuildResponse(common.CODE_NOT_LOGIN, common.ERR_NEED_LOGIN.Error(), "")
 		if _, err = resp.Write(bytes); err != nil {
 			goto ERR
 		}
 		return
 	}
-	if G_config.CommandCheck{
-		if output,err=common.ValidShells(G_config.ShellCommand); err != nil {
+	if G_config.CommandCheck {
+		if output, err = common.ValidShells(G_config.ShellCommand); err != nil {
 			goto ERR
 		}
 
-	}else{
-		output=[]string{"所有的,没限制"}
+	} else {
+		output = []string{"所有的,没限制"}
 
 	}
 	if bytes, err = common.BuildResponse(common.CODE_SUCCESS, "success", output); err != nil {

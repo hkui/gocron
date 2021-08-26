@@ -2,10 +2,10 @@ package master
 
 import (
 	"context"
-	"crontab/common"
 	"encoding/json"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
+	"gocron/crontab/common"
 	"math"
 )
 type JobMgr struct {

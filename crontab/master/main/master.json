@@ -9,7 +9,7 @@
   "apiWriteTimeout": 5000,
 
   "etcd集群列表":"多个" ,
-  "etcdEndpoints": ["39.100.78.46:2379"],
+  "etcdEndpoints": ["139.198.170.149:2379"],
 
   "etcd连接超时":"单位毫秒",
   "ectdDialTimeout": 5000,
@@ -18,7 +18,7 @@
   "webroot": "./webroot",
 
   "mongodb地址": "多个",
-  "mongodbUri": ["39.100.78.46:27017"],
+  "mongodbUri": ["139.198.170.149:27017"],
 
 
   "mongodb连接超时":"单位毫秒",

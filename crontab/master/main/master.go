@@ -1,10 +1,10 @@
 package main
 
 import (
-	"crontab/common"
-	"crontab/master"
 	"flag"
 	"fmt"
+	"gocron/crontab/common"
+	"gocron/crontab/master"
 	"time"
 )
 
@@ -14,7 +14,7 @@ var (
 
 func initArgs() {
 	// master -config ./master.json
-	flag.StringVar(&confFile, "config", "./master.json", "指定master.josn")
+	flag.StringVar(&confFile, "config", "./master.json", "指定master.json")
 	flag.Parse()
 }
 func main() {
@@ -32,13 +32,13 @@ func main() {
 	if err = master.InitJobMgr(); err != nil {
 		goto ERR
 	}
-	if err=master.InitLogMgr();err!=nil{
+	if err = master.InitLogMgr(); err != nil {
 		goto ERR
 	}
-	if err=master.InitWorkerMgr();err!=nil{
+	if err = master.InitWorkerMgr(); err != nil {
 		goto ERR
 	}
-	if err=master.InitUserMgr();err!=nil{
+	if err = master.InitUserMgr(); err != nil {
 		goto ERR
 	}
 
@@ -46,7 +46,7 @@ func main() {
 	if err = master.InitApiServer(); err != nil {
 		goto ERR
 	}
-	fmt.Println("Server listen on ",master.G_config.ApiPort)
+	fmt.Println("Server listen on ", master.G_config.ApiPort)
 	for {
 		time.Sleep(1 * time.Second)
 	}
