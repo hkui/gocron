@@ -1,12 +1,12 @@
 package main
 
 import (
-	"base/etcd/client"
 	"context"
-	"crontab/common"
 	"encoding/json"
 	"fmt"
 	"go.etcd.io/etcd/clientv3"
+	"gocron/base/etcd/client"
+	"gocron/crontab/common"
 	"time"
 )
 
@@ -42,8 +42,7 @@ func main() {
 		//clientv3.WithMinModRev(10338),
 
 	)
-	fmt.Println(Resp.Header.Revision)
-
+	fmt.Println("revision=",Resp.Header.Revision)
 
 	cancel()
 
@@ -65,10 +64,4 @@ func main() {
 	}
 	//sort.Sort(common.JobList(jobList))
 	fmt.Printf("%++v\n",jobList)
-	fmt.Printf("%++v\n",jobList[2:30])
-
-
-
-
-
 }

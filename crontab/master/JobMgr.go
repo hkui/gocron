@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/mvcc/mvccpb"
 	"gocron/crontab/common"
 	"math"
 )
@@ -89,7 +88,7 @@ func (JobMgr *JobMgr)JobList( page int64,limit int64 )(
 	jobListsRes common.JobListsRes,err error) {
 	var (
 		getResp *clientv3.GetResponse
-		kvPair *mvccpb.KeyValue
+		//kvPair *mvccpb.KeyValue
 		jobOne common.JobListOne
 		jobList []common.JobListOne
 		end int64
@@ -110,7 +109,8 @@ func (JobMgr *JobMgr)JobList( page int64,limit int64 )(
 		);err!=nil{
 		return
 	}
-	for _,kvPair=range getResp.Kvs{
+
+	for _,kvPair:=range getResp.Kvs{
 		if err=json.Unmarshal(kvPair.Value,&jobOne);err==nil{
 			jobOne.ModRevision=kvPair.ModRevision
 			jobList=append(jobList,jobOne)

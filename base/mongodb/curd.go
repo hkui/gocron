@@ -1,8 +1,8 @@
 package main
 
 import (
-	"base/mongodb/conn"
-	"base/mongodb/models"
+	"gocron/base/mongodb/conn"
+	"gocron/base/mongodb/models"
 	"context"
 	"fmt"
 )

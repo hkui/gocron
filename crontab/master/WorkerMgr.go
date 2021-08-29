@@ -3,7 +3,6 @@ package master
 import (
 	"context"
 	"go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/mvcc/mvccpb"
 	"gocron/crontab/common"
 )
 
@@ -46,7 +45,7 @@ func InitWorkerMgr() (err error) {
 func (workerMgr *WorkerMgr) ListWorkers() (workerArr []string, err error) {
 	var (
 		getResp *clientv3.GetResponse
-		kv *mvccpb.KeyValue
+		//kv *mvccpb.KeyValue
 		workerIP string
 	)
 
@@ -64,7 +63,7 @@ func (workerMgr *WorkerMgr) ListWorkers() (workerArr []string, err error) {
 	}
 
 	// 解析每个节点的IP
-	for _, kv = range getResp.Kvs {
+	for _,kv:= range getResp.Kvs {
 		// kv.Key : /cron/workers/192.168.2.1
 		workerIP = common.ExtractWorkerIP(string(kv.Key))
 		workerArr = append(workerArr, workerIP)

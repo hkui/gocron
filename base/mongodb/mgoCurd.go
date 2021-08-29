@@ -1,7 +1,7 @@
 package main
 //使用mgo的
 import (
-	"base/mongodb/conn"
+	"gocron/base/mongodb/conn"
 	"fmt"
 	"gopkg.in/mgo.v2"
 )

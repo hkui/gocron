@@ -1,10 +1,10 @@
 package main
 
 import (
-	"base/etcd/client"
 	"context"
 	"fmt"
 	"go.etcd.io/etcd/clientv3"
+	"gocron/base/etcd/client"
 	"time"
 )
 

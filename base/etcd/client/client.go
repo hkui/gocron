@@ -14,7 +14,7 @@ func GetClient()(*clientv3.Client,error){
 
 	)
 	config=clientv3.Config{
-		Endpoints:[]string{"39.100.78.46:2379"},
+		Endpoints:[]string{"139.198.170.149:2379"},
 		DialTimeout:3*time.Second,
 	}
 
@@ -22,5 +22,5 @@ func GetClient()(*clientv3.Client,error){
 		fmt.Println(err)
 		return nil,err
 	}
-	return Connectclient,nil;
+	return Connectclient,nil
 }
