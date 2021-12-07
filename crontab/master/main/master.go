@@ -14,7 +14,7 @@ var (
 
 func initArgs() {
 	// master -config ./master.json
-	flag.StringVar(&confFile, "config", "./master.json", "指定master.json")
+	flag.StringVar(&confFile, "config", "conf/master.json", "指定master.json")
 	flag.Parse()
 }
 func main() {

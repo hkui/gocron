@@ -1,7 +1,7 @@
 package worker
 
 import (
-	"crontab/common"
+	"gocron/crontab/common"
 	"os/exec"
 	"time"
 )

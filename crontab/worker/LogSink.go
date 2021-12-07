@@ -2,19 +2,20 @@ package worker
 
 import (
 	"context"
-	"crontab/common"
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
+	"gocron/crontab/common"
 	"time"
 )
 
 type LogSink struct {
-	client *mongo.Client
-	logCollection *mongo.Collection
-	logChan chan *common.JobLog
+	client         *mongo.Client
+	logCollection  *mongo.Collection
+	logChan        chan *common.JobLog
 	autoCommitChan chan *common.LogBatch
 }
-var(
+
+var (
 	G_logSink *LogSink
 )
 
@@ -22,15 +23,14 @@ func InitLogSink() (err error) {
 	var (
 		client *mongo.Client
 	)
-	if client,err=common.GetMongoClient(G_config.MongodbUri);err!=nil{
+	if client, err = common.GetMongoClient(G_config.MongodbUri); err != nil {
 		return
 	}
-	G_logSink=&LogSink{
-		client:client,
-		logCollection:client.Database("cron").Collection("log"),
-		logChan:make(chan *common.JobLog,100),
-		autoCommitChan:make(chan *common.LogBatch,1000),
-
+	G_logSink = &LogSink{
+		client:         client,
+		logCollection:  client.Database("cron").Collection("log"),
+		logChan:        make(chan *common.JobLog, 100),
+		autoCommitChan: make(chan *common.LogBatch, 1000),
 	}
 	go G_logSink.writeLoop()
 	return
@@ -38,20 +38,20 @@ func InitLogSink() (err error) {
 }
 func (logSink *LogSink) writeLoop() {
 	var (
-		log *common.JobLog
-		logBatch *common.LogBatch // 当前的批次
-		commitTimer *time.Timer
+		log          *common.JobLog
+		logBatch     *common.LogBatch // 当前的批次
+		commitTimer  *time.Timer
 		timeoutBatch *common.LogBatch // 超时批次
 	)
 
 	for {
 		select {
-		case log = <- logSink.logChan:
+		case log = <-logSink.logChan:
 			if logBatch == nil {
 				logBatch = &common.LogBatch{}
 				// 让这个批次超时自动提交(给1秒的时间）
 				commitTimer = time.AfterFunc(
-					time.Duration(G_config.JobLogCommitTimeout) * time.Millisecond,
+					time.Duration(G_config.JobLogCommitTimeout)*time.Millisecond,
 					func(batch *common.LogBatch) func() {
 						return func() {
 							logSink.autoCommitChan <- batch
@@ -59,7 +59,7 @@ func (logSink *LogSink) writeLoop() {
 					}(logBatch),
 				)
 			}
-			fmt.Printf("追加日志:%++v\n",log.JobName)
+			fmt.Printf("追加日志:%++v\n", log.JobName)
 			// 把新日志追加到批次中
 			logBatch.Logs = append(logBatch.Logs, log)
 
@@ -72,7 +72,7 @@ func (logSink *LogSink) writeLoop() {
 				// 取消定时器
 				commitTimer.Stop()
 			}
-		case timeoutBatch = <- logSink.autoCommitChan: // 过期的批次
+		case timeoutBatch = <-logSink.autoCommitChan: // 过期的批次
 			// 判断过期批次是否仍旧是当前的批次
 			if timeoutBatch != logBatch {
 				continue // 跳过已经被提交的批次
@@ -85,20 +85,21 @@ func (logSink *LogSink) writeLoop() {
 	}
 }
 
-func (logSink *LogSink)Append( log *common.JobLog)  {
+func (logSink *LogSink) Append(log *common.JobLog) {
 	select {
-		case logSink.logChan<-log:  //队列满了就会阻塞,走到default,开始下一个监听
+	case logSink.logChan <- log: //队列满了就会阻塞,走到default,开始下一个监听
 
 	default:
-		fmt.Printf("丢弃日志%v\n",log.JobName)
+		fmt.Printf("丢弃日志%v\n", log.JobName)
 	}
 
 }
+
 // 批量写入日志
-func (logSink *LogSink) saveLogs(batch *common.LogBatch)(err error) {
-	fmt.Println("入库",len(batch.Logs),"条日志")
-	_,err=logSink.logCollection.InsertMany(context.TODO(), batch.Logs)
-	if err!=nil {
+func (logSink *LogSink) saveLogs(batch *common.LogBatch) (err error) {
+	fmt.Println("入库", len(batch.Logs), "条日志")
+	_, err = logSink.logCollection.InsertMany(context.TODO(), batch.Logs)
+	if err != nil {
 		fmt.Println(err)
 	}
 	return

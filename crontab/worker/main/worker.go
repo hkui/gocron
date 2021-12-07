@@ -1,19 +1,20 @@
 package main
 
 import (
-	"crontab/common"
-	"crontab/worker"
 	"flag"
 	"fmt"
+	"gocron/crontab/common"
+	"gocron/crontab/worker"
 	"time"
 )
+
 var (
 	confFile string
 )
 
 func initArgs() {
 	// worker -config ./worker.json
-	flag.StringVar(&confFile, "config", "./worker.json", "指定worker.json")
+	flag.StringVar(&confFile, "config", "conf/worker.json", "指定worker.json")
 	flag.Parse()
 }
 func main() {
@@ -26,26 +27,26 @@ func main() {
 	if err = worker.InitConfig(confFile); err != nil {
 		goto ERR
 	}
-	if err=worker.InitRegister();err!=nil{
+	if err = worker.InitRegister(); err != nil {
 		goto ERR
 	}
 	//启动执行器（执行shell命令）
-	if err=worker.InitExecutor();err!=nil{
+	if err = worker.InitExecutor(); err != nil {
 		goto ERR
 	}
 
-	if err=worker.InitScheduler();err!=nil{
+	if err = worker.InitScheduler(); err != nil {
 		goto ERR
 	}
-	if err=worker.InitLogSink();err!=nil{
+	if err = worker.InitLogSink(); err != nil {
 		goto ERR
 	}
 	//初始化任务管理器
-	if err=worker.InitJobMgr();err!=nil{
+	if err = worker.InitJobMgr(); err != nil {
 		goto ERR
 	}
-	err=worker.G_jobMgr.WatchJobs()
-	if err!=nil{
+	err = worker.G_jobMgr.WatchJobs()
+	if err != nil {
 		goto ERR
 	}
 	worker.G_jobMgr.WatchKiller()

@@ -20,7 +20,8 @@ func main() {
 
 	)
 	if Connectclient,err=client.GetClient();err!=nil{
-		fmt.Println(err);
+		fmt.Println(err)
+		return
 	}
 
 

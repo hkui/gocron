@@ -2,8 +2,8 @@ package worker
 
 import (
 	"context"
-	"crontab/common"
 	"go.etcd.io/etcd/clientv3"
+	"gocron/crontab/common"
 	"net"
 	"time"
 )
@@ -11,8 +11,8 @@ import (
 // 注册节点到etcd： /cron/workers/IP地址
 type Register struct {
 	client *clientv3.Client
-	kv clientv3.KV
-	lease clientv3.Lease
+	kv     clientv3.KV
+	lease  clientv3.Lease
 
 	localIP string // 本机IP
 }
@@ -20,17 +20,17 @@ type Register struct {
 var (
 	G_register *Register
 )
+
 func InitRegister() (err error) {
 	var (
-
-		client *clientv3.Client
-		kv clientv3.KV
-		lease clientv3.Lease
+		client  *clientv3.Client
+		kv      clientv3.KV
+		lease   clientv3.Lease
 		localIp string
 	)
 
 	// 建立连接
-	if client, err = common.GetEtcdClient(G_config.EtcdEndpoints,G_config.EctdDialTimeout); err != nil {
+	if client, err = common.GetEtcdClient(G_config.EtcdEndpoints, G_config.EctdDialTimeout); err != nil {
 		return
 	}
 
@@ -44,9 +44,9 @@ func InitRegister() (err error) {
 	lease = clientv3.NewLease(client)
 
 	G_register = &Register{
-		client: client,
-		kv: kv,
-		lease: lease,
+		client:  client,
+		kv:      kv,
+		lease:   lease,
 		localIP: localIp,
 	}
 
@@ -59,9 +59,9 @@ func InitRegister() (err error) {
 // 获取本机网卡IP
 func getLocalIP() (ipv4 string, err error) {
 	var (
-		addrs []net.Addr
-		addr net.Addr
-		ipNet *net.IPNet // IP地址
+		addrs   []net.Addr
+		addr    net.Addr
+		ipNet   *net.IPNet // IP地址
 		isIpNet bool
 	)
 	// 获取所有网卡
@@ -74,7 +74,7 @@ func getLocalIP() (ipv4 string, err error) {
 		if ipNet, isIpNet = addr.(*net.IPNet); isIpNet && !ipNet.IP.IsLoopback() {
 			// 跳过IPV6
 			if ipNet.IP.To4() != nil {
-				ipv4 = ipNet.IP.String()	// 192.168.1.1
+				ipv4 = ipNet.IP.String() // 192.168.1.1
 				return
 			}
 		}
@@ -87,15 +87,14 @@ func getLocalIP() (ipv4 string, err error) {
 // 注册到/cron/workers/IP, 并自动续租
 func (register *Register) keepOnline() {
 	var (
-		regKey string
+		regKey         string
 		leaseGrantResp *clientv3.LeaseGrantResponse
-		err error
-		keepAliveChan <- chan *clientv3.LeaseKeepAliveResponse
-		keepAliveResp *clientv3.LeaseKeepAliveResponse
-		cancelCtx context.Context
-		cancelFunc context.CancelFunc
+		err            error
+		keepAliveChan  <-chan *clientv3.LeaseKeepAliveResponse
+		keepAliveResp  *clientv3.LeaseKeepAliveResponse
+		cancelCtx      context.Context
+		cancelFunc     context.CancelFunc
 	)
-
 
 	for {
 		// 注册路径
@@ -123,19 +122,17 @@ func (register *Register) keepOnline() {
 		// 处理续租应答
 		for {
 			select {
-			case keepAliveResp = <- keepAliveChan:
-				if keepAliveResp == nil {	// 续租失败
+			case keepAliveResp = <-keepAliveChan:
+				if keepAliveResp == nil { // 续租失败
 					goto RETRY
 				}
 			}
 		}
 
-		RETRY:
+	RETRY:
 		time.Sleep(1 * time.Second)
 		if cancelFunc != nil {
 			cancelFunc()
 		}
 	}
 }
-
-
