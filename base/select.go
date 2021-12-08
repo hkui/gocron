@@ -7,31 +7,28 @@ import (
 
 func main() {
 	var (
-		Ch chan int
+		Ch   chan int
 		flag chan bool
 	)
-	Ch=make(chan int,2)
-	flag=make(chan bool)
+	Ch = make(chan int, 2)
+	flag = make(chan bool)
 
 	go func() {
-		for i:=1;i<10;i++{
-			Ch<-i
+		for i := 1; i < 10; i++ {
+			Ch <- i
 		}
-		time.Sleep(1*time.Millisecond)
+		time.Sleep(1 * time.Millisecond)
 		close(flag)
 	}()
 
-	for{
+	for {
 		select {
-			case g:=<-Ch:
+		case g := <-Ch:
 			fmt.Println(g)
-			case <-flag:
-				goto END
+		case <-flag:
+			goto END
 
 		}
 	}
-	END:
-
-
-
+END:
 }

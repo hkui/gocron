@@ -2,17 +2,17 @@ package conn
 
 import (
 	"context"
-	"github.com/gpmgo/gopm/modules/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/mgo.v2"
+	"log"
 	"time"
 )
 var (
 	session *mgo.Session
 	err error
 )
-const url  ="39.100.78.46:27017"
+const url  ="139.198.170.149:27017"
 
 func GetSession()(*mgo.Session,error){
 	if session,err=mgo.Dial(url);err!=nil{
@@ -36,11 +36,6 @@ func GetClient() *mongo.Client {
 		log.Fatal(err.Error())
 	}
 	return client
-
-
-
-
-
 }
 
 

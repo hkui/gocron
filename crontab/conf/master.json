@@ -1,38 +1,28 @@
 {
   "API接口服务端口": "提供curd服务",
   "apiPort": 8070,
-
   "API接口读超时": "单位毫秒",
   "apiReadTimeout": 5000,
-
   "API接口写超时": "单位毫秒",
   "apiWriteTimeout": 5000,
-
-  "etcd集群列表":"多个" ,
-  "etcdEndpoints": ["139.198.170.149:2379"],
-
-  "etcd连接超时":"单位毫秒",
+  "etcd集群列表": "多个",
+  "etcdEndpoints": [
+    "139.198.170.149:2379"
+  ],
+  "etcd连接超时": "单位毫秒",
   "ectdDialTimeout": 5000,
-
   "web页面根目录": "",
   "webroot": "./webroot",
-
   "mongodb地址": "多个",
-  "mongodbUri": ["139.198.170.149:27017"],
-
-
-  "mongodb连接超时":"单位毫秒",
+  "mongodbUri": [
+    "139.198.170.149:27017"
+  ],
+  "mongodb连接超时": "单位毫秒",
   "mongodbConnectTimeout": 5000,
-
-
-  "是否开启命令验证":"不开启的话，写入啥命令就是啥命令,否者从下面ShellCommand列表里获取",
+  "是否开启命令验证": "不开启的话，写入啥命令就是啥命令,否者从下面ShellCommand列表里获取",
   "CommandCheck": false,
-
-   "Yii Path": "Yii的路径",
-   "Yii": " php /code/yii/yii",
-
-  "能执行的shell由下面的命令获取":" shellCommandUse 为1时才生效",
+  "Yii Path": "Yii的路径",
+  "Yii": " php /code/yii/yii",
+  "能执行的shell由下面的命令获取": " shellCommandUse 为1时才生效",
   "shellCommand": "php /code/yii/yii|grep -E '^\\s+[a-z-]+/[a-z-]+'|awk '{print $1}'"
-
-
 }

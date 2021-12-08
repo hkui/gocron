@@ -1,17 +1,16 @@
 package main
 
 import (
-	"gocron/base/mongodb/conn"
-	"gocron/base/mongodb/models"
 	"context"
 	"fmt"
+	"gocron/base/mongodb/conn"
+	"gocron/base/mongodb/models"
 )
 
-
 func main() {
-	client:=conn.GetClient()
+	client := conn.GetClient()
 
-	collection:=client.Database("test").Collection("stu")
+	collection := client.Database("test").Collection("stu")
 	//插入1条
 	/*stu:= models.Stu{
 		Name:"hkui",
@@ -29,23 +28,20 @@ func main() {
 	//插入多条
 	var manydocs []interface{}
 	var oneStu models.Stu
-	for i:=0;i<10 ;i++  {
-		oneStu=*new(models.Stu)
-		oneStu.Name=fmt.Sprintf("hkui_%d",i)
-		oneStu.Age=i
-		oneStu.Sex=i/2
-		oneStu.ClassNo=i
-		manydocs= append(manydocs, oneStu)
+	for i := 0; i < 10; i++ {
+		oneStu = *new(models.Stu)
+		oneStu.Name = fmt.Sprintf("hkui_%d", i)
+		oneStu.Age = i
+		oneStu.Sex = i / 2
+		oneStu.ClassNo = i
+		manydocs = append(manydocs, oneStu)
 
 	}
 
-	insertManyRes,err:=collection.InsertMany(context.TODO(),manydocs)
-	if err!=nil{
+	insertManyRes, err := collection.InsertMany(context.TODO(), manydocs)
+	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(insertManyRes.InsertedIDs)
-
-
-
 
 }

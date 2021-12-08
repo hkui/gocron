@@ -1,21 +1,18 @@
 {
-
-
-  "etcd集群列表":"多个" ,
-  "etcdEndpoints": ["139.198.170.149:2379"],
-
-  "etcd连接超时":"单位毫秒",
+  "etcd集群列表": "多个",
+  "etcdEndpoints": [
+    "139.198.170.149:2379"
+  ],
+  "etcd连接超时": "单位毫秒",
   "ectdDialTimeout": 5000,
-
   "mongodb地址": "多个",
-  "mongodbUri": ["139.198.170.149:27017"],
-
-  "mongodb连接超时":"单位毫秒",
+  "mongodbUri": [
+    "139.198.170.149:27017"
+  ],
+  "mongodb连接超时": "单位毫秒",
   "mongodbConnectTimeout": 5000,
-
   "mongodb日志提交间隔": "单位毫秒",
-  "JobLogCommitTimeout":10000,
-
+  "JobLogCommitTimeout": 10000,
   "mongodb日志提交缓存大小": "单位个数",
-  "JobLogBatchSize":10
+  "JobLogBatchSize": 10
 }

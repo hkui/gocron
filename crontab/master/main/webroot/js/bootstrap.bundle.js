@@ -7,7 +7,8 @@
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('jquery')) :
         typeof define === 'function' && define.amd ? define(['exports', 'jquery'], factory) :
             (global = global || self, factory(global.bootstrap = {}, global.jQuery));
-}(this, function (exports, $) { 'use strict';
+}(this, function (exports, $) {
+    'use strict';
 
     $ = $ && $.hasOwnProperty('default') ? $['default'] : $;
 
@@ -120,6 +121,7 @@
         $.fn.emulateTransitionEnd = transitionEndEmulator;
         $.event.special[Util.TRANSITION_END] = getSpecialTransitionEndEvent();
     }
+
     /**
      * --------------------------------------------------------------------------
      * Public Util Api
@@ -1880,9 +1882,6 @@
     }();
 
 
-
-
-
     var defineProperty = function (obj, key, value) {
         if (key in obj) {
             Object.defineProperty(obj, key, {
@@ -1951,7 +1950,8 @@
             } else {
                 rect = element.getBoundingClientRect();
             }
-        } catch (e) {}
+        } catch (e) {
+        }
 
         var result = {
             left: rect.left,
@@ -2114,7 +2114,7 @@
 
         // NOTE: 1 DOM access here
 
-        var boundaries = { top: 0, left: 0 };
+        var boundaries = {top: 0, left: 0};
         var offsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, reference);
 
         // Handle viewport case
@@ -2274,7 +2274,7 @@
      * @returns {String} flipped placement
      */
     function getOppositePlacement(placement) {
-        var hash = { left: 'right', right: 'left', bottom: 'top', top: 'bottom' };
+        var hash = {left: 'right', right: 'left', bottom: 'top', top: 'bottom'};
         return placement.replace(/left|right|bottom|top/g, function (matched) {
             return hash[matched];
         });
@@ -2526,7 +2526,7 @@
     function attachToScrollParents(scrollParent, event, callback, scrollParents) {
         var isBody = scrollParent.nodeName === 'BODY';
         var target = isBody ? scrollParent.ownerDocument.defaultView : scrollParent;
-        target.addEventListener(event, callback, { passive: true });
+        target.addEventListener(event, callback, {passive: true});
 
         if (!isBody) {
             attachToScrollParents(getScrollParent(target.parentNode), event, callback, scrollParents);
@@ -2543,7 +2543,7 @@
     function setupEventListeners(reference, options, state, updateBound) {
         // Resize event listener on window
         state.updateBound = updateBound;
-        getWindow(reference).addEventListener('resize', state.updateBound, { passive: true });
+        getWindow(reference).addEventListener('resize', state.updateBound, {passive: true});
 
         // Scroll event listener on scroll parents
         var scrollElement = getScrollParent(reference);
@@ -2703,7 +2703,7 @@
 
         // Apply `position` to popper before anything else because
         // without the position applied we can't guarantee correct computations
-        setStyles(popper, { position: options.positionFixed ? 'fixed' : 'absolute' });
+        setStyles(popper, {position: options.positionFixed ? 'fixed' : 'absolute'});
 
         return options;
     }
@@ -3261,8 +3261,8 @@
             var measurement = (index === 1 ? !useHeight : useHeight) ? 'height' : 'width';
             var mergeWithPrevious = false;
             return op
-            // This aggregates any `+` or `-` sign that aren't considered operators
-            // e.g.: 10 + +5 => [10, +, +5]
+                // This aggregates any `+` or `-` sign that aren't considered operators
+                // e.g.: 10 + +5 => [10, +, +5]
                 .reduce(function (a, b) {
                     if (a[a.length - 1] === '' && ['+', '-'].indexOf(b) !== -1) {
                         a[a.length - 1] = b;
@@ -3895,7 +3895,8 @@
          * Access Popper.js instance with `data.instance`.
          * @prop {onCreate}
          */
-        onCreate: function onCreate() {},
+        onCreate: function onCreate() {
+        },
 
         /**
          * Callback called when the popper is updated. This callback is not called
@@ -3905,7 +3906,8 @@
          * Access Popper.js instance with `data.instance`.
          * @prop {onUpdate}
          */
-        onUpdate: function onUpdate() {},
+        onUpdate: function onUpdate() {
+        },
 
         /**
          * List of modifiers used to modify the offsets before they are applied to the popper.
@@ -3975,7 +3977,7 @@
                         name: name
                     }, _this.options.modifiers[name]);
                 })
-                // sort the modifiers by order
+                    // sort the modifiers by order
                     .sort(function (a, b) {
                         return a.order - b.order;
                     });
@@ -7007,7 +7009,7 @@
     exports.Toast = Toast;
     exports.Tooltip = Tooltip;
 
-    Object.defineProperty(exports, '__esModule', { value: true });
+    Object.defineProperty(exports, '__esModule', {value: true});
 
 }));
 //# sourceMappingURL=bootstrap.bundle.js.map

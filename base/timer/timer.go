@@ -14,7 +14,7 @@ func main() {
 	//t1=time.NewTicker(1*time.Second)
 
 	go func() {
-		i:=0;
+		i:=0
 		for{
 			select {
 			case <-t.C:

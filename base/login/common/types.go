@@ -6,5 +6,3 @@ type Session interface {
 	Delete(key interface{}) error     //删除Session
 	SessionID() string                //当前SessionID
 }
-
-

@@ -6,21 +6,20 @@ import (
 	"time"
 )
 
-func GetClient()(*clientv3.Client,error){
+func GetClient() (*clientv3.Client, error) {
 	var (
-		config clientv3.Config
+		config        clientv3.Config
 		Connectclient *clientv3.Client
-		err error
-
+		err           error
 	)
-	config=clientv3.Config{
-		Endpoints:[]string{"139.198.170.149:2379"},
-		DialTimeout:3*time.Second,
+	config = clientv3.Config{
+		Endpoints:   []string{"139.198.170.149:2379"},
+		DialTimeout: 3 * time.Second,
 	}
 
-	if Connectclient,err=clientv3.New(config);err!=nil{
+	if Connectclient, err = clientv3.New(config); err != nil {
 		fmt.Println(err)
-		return nil,err
+		return nil, err
 	}
-	return Connectclient,nil
+	return Connectclient, nil
 }

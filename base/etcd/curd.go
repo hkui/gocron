@@ -12,20 +12,17 @@ import (
 
 func main() {
 	var (
-
 		Connectclient *clientv3.Client
-		err error
-		jobList common.JobList
-		jobListOne common.JobListOne
-
+		err           error
+		jobList       common.JobList
+		jobListOne    common.JobListOne
 	)
-	if Connectclient,err=client.GetClient();err!=nil{
+	if Connectclient, err = client.GetClient(); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-
-	kv:=clientv3.NewKV(Connectclient)
+	kv := clientv3.NewKV(Connectclient)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
 	//写
@@ -35,34 +32,34 @@ func main() {
 
 	//读某个前缀的
 
-	Resp,err:=kv.Get(ctx,"/cron/jobs/",
+	Resp, err := kv.Get(ctx, "/cron/jobs/",
 		clientv3.WithPrefix(),
-		clientv3.WithSort(clientv3.SortByModRevision,clientv3.SortAscend),
+		clientv3.WithSort(clientv3.SortByModRevision, clientv3.SortAscend),
 		//clientv3.WithLimit(3),
 		//clientv3.WithMaxModRev(0),
 		//clientv3.WithMinModRev(10338),
 
 	)
-	fmt.Println("revision=",Resp.Header.Revision)
+	fmt.Println("revision=", Resp.Header.Revision)
 
 	cancel()
 
-	if err!=nil{
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
 	//读
-	fmt.Println(Resp.Count,Resp.More,Resp.Header)
-	for _,kvPair:=range Resp.Kvs{
-		if err=json.Unmarshal(kvPair.Value,&jobListOne);err==nil{
-			jobListOne.ModRevision=kvPair.ModRevision
-			jobList=append(jobList,jobListOne)
+	fmt.Println(Resp.Count, Resp.More, Resp.Header)
+	for _, kvPair := range Resp.Kvs {
+		if err = json.Unmarshal(kvPair.Value, &jobListOne); err == nil {
+			jobListOne.ModRevision = kvPair.ModRevision
+			jobList = append(jobList, jobListOne)
 			fmt.Println(kvPair)
-		}else{
-			err=nil
+		} else {
+			err = nil
 		}
 	}
 	//sort.Sort(common.JobList(jobList))
-	fmt.Printf("%++v\n",jobList)
+	fmt.Printf("%++v\n", jobList)
 }

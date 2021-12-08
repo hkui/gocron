@@ -14,7 +14,7 @@ func main() {
 		cmd   *exec.Cmd
 		err   error
 		shell string
-		 out bytes.Buffer
+		out   bytes.Buffer
 	)
 
 	shell = " php /code/yii/yii"
@@ -22,22 +22,19 @@ func main() {
 
 	cmd = exec.Command("/bin/bash", "-c", shell)
 
-
-
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 
- 	cmd.Stdout = &out
+	cmd.Stdout = &out
 
- //Run执行c包含的命令，并阻塞直到完成。  这里stdout被取出，cmd.Wait()无法正确获取stdin,stdout,stderr，则阻塞在那了
- 	err = cmd.Run()
-
+	//Run执行c包含的命令，并阻塞直到完成。  这里stdout被取出，cmd.Wait()无法正确获取stdin,stdout,stderr，则阻塞在那了
+	err = cmd.Run()
 
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
- 	fmt.Println(out.String())
+	fmt.Println(out.String())
 
 }
